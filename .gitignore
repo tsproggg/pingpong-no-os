@@ -1,0 +1,10 @@
+### IDE
+/.vs
+/.idea
+
+### Assembler
+*.exe
+*.o
+*.obj
+*.bc
+
