@@ -2,6 +2,7 @@ bits 16
 
 section .text
     global _start
+    extern clear_screen
 
 ; FIXME: The success_msg is not visible in the output of qemu
 
@@ -9,7 +10,8 @@ _start:
     mov ax, cs
     mov ds, ax
 
-    call print_string_vga
+    call clear_screen
+    ; call print_string_vga
     hlt
 
 ; New VGA Text Output Procedure
