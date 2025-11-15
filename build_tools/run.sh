@@ -11,16 +11,12 @@ fi
 # --- QEMU Run ---
 QEMU_EXTRA=${QEMU_EXTRA:-""}
 
-if [ -n "$DISPLAY" ]; then
-  echo "Launching QEMU (graphical) with floppy image..."
-  exec qemu-system-i386 -fda "$FLOPPY_IMG" -boot a -m 16 $QEMU_EXTRA
-else
-  echo "No DISPLAY detected — launching QEMU in text mode (-nographic)."
+echo "Launching QEMU (graphical) with floppy image..."
   # -nographic redirects serial output to the console.
-  exec qemu-system-i386 \
+exec qemu-system-i386 \
     -drive file="$FLOPPY_IMG",format=raw,if=floppy \
     -boot a \
     -m 16 \
-    -nographic \
+          -vga std \
+          -vnc :0 \
     $QEMU_EXTRA
-fi

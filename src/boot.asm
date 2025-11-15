@@ -8,6 +8,9 @@ start:
     mov sp, 0xFFFF      ; Set the Stack Pointer (SP) to the top of the segment
     sti
 
+    mov ax, cs
+    mov ds, ax
+
 load_kernel:
     mov ah, 0x02        ; BIOS read sectors
     mov al, 1           ; number of sectors
