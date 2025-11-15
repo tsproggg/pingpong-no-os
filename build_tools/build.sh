@@ -2,6 +2,8 @@ set -ex
 
 cd /app/src || exit 2
 
+shopt -s globstar
+
 # --- Define Variables ---
 BOOT_ASM="boot.asm"
 BOOT_BIN="/app/boot.bin"
@@ -26,14 +28,19 @@ echo "Produced boot sector: $BOOT_BIN"
 # --- Assembly: Stage 2 (All other .asm files) ---
 KERNEL_OBJS=""
 
-for f in *.asm; do
+for f in **/*.asm; do
   # Skip the bootloader file
-  if [ "$f" = "$BOOT_ASM" ]; then
+  if [ "$(basename "$f")" = "$BOOT_ASM" ]; then
     continue
   fi
 
   echo "==== Assembling KERNEL/GAME component: $f ===="
-  obj="${f%.asm}.o"
+  # 1. Strip the .asm suffix
+  stem="${f%.asm}"  # e.g., 'src/game/player'
+  # 2. Replace all forward slashes (/) with underscores (_)
+  unique_base="${stem//\//_}"
+  obj="${unique_base}.o" # e.g., 'src_game_player.o'
+
   nasm -f elf "$f" -o "$obj" # Assemble as ELF
   KERNEL_OBJS="$KERNEL_OBJS $obj"
 done

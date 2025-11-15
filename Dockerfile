@@ -20,4 +20,4 @@ RUN chmod +x ${BUILD_TOOLS_DIR}/run.sh
 # --- Update ENTRYPOINT to run both sequentially ---
 # Run build, and if successful, run the emulator.
 RUN sed -i 's/\r$//' ${BUILD_TOOLS_DIR}/build.sh ${BUILD_TOOLS_DIR}/run.sh
-ENTRYPOINT ["/bin/sh", "-c", "${BUILD_TOOLS_DIR}/build.sh && ${BUILD_TOOLS_DIR}/run.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "${BUILD_TOOLS_DIR}/build.sh && ${BUILD_TOOLS_DIR}/run.sh"]
