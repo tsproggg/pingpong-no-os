@@ -28,7 +28,3 @@ print_string:
 
     .done:
         ret
-
-
-success_msg db "Kernel successfully loaded", 10
-success_msg_l equ 26

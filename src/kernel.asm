@@ -1,11 +1,15 @@
 bits 16
 
+section .data
+success_msg db "Kernel successfully loaded", 10
+success_msg_l equ 27
+
 section .text
     global _start
     extern clear_screen
     extern print_string
 
-; FIXME: The success_msg is not visible in the output of qemu
+; FIXME: CPU loses ptr to the .data segment after compilation
 
 _start:
     mov ax, cs
@@ -17,6 +21,3 @@ _start:
     mov cx, success_msg_l
     call print_string
     hlt
-
-success_msg db "Kernel successfully loaded", 10
-success_msg_l equ 27
