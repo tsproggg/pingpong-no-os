@@ -17,6 +17,6 @@ exec qemu-system-i386 \
     -drive file="$FLOPPY_IMG",format=raw,if=floppy \
     -boot a \
     -m 16 \
-          -vga std \
-          -vnc :0 \
+    -vga std \
+    -vnc :0 \
     $QEMU_EXTRA

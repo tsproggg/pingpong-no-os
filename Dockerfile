@@ -8,7 +8,7 @@ WORKDIR /app
 # Install nasm (assembler), build-essential (for ld) and qemu-system-i386 (emulator for 16-bit)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-         nasm build-essential qemu-system-i386 \
+         nasm qemu-system-i386 gdb \
     && rm -rf /var/lib/apt/lists/*
 
 COPY src/ /app/src/
