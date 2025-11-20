@@ -1,31 +1,45 @@
 bits 16
 org 0x0000
 
+
 section .data
     success_msg db "Kernel successfully loaded", 13, 10, 0
+
+    number_to_string_f_buff db 0,0,0,0,0,0
+
 
 section .text
     global _start
 
+
+; ----------------------------------
+; |     SUBROUTINE: START          |
+; ----------------------------------
 _start:
+    ; stack initialization
     cli
     mov ax, 0x9000      ; Load the desired stack segment value into AX
     mov ss, ax          ; Set the Stack Segment (SS)
     mov sp, 0xFFFF      ; Set the Stack Pointer (SP) to the top of the segment
     sti
 
+    ; section .data pointer initialization
     mov ax, cs
     mov ds, ax
 
+    ; clear screen
     call clear_screen
 
+    ; debug message
     mov si, success_msg
     call print_string
     hlt
 
-; ---------------------------
-; |     SUBROUTINE          |
-; ---------------------------
+; --------------------    SCREEN    --------------------
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
 ; Inputs: none
 ; Used registers: ax, bx, dx
 clear_screen:
@@ -41,9 +55,10 @@ clear_screen:
     int 0x10
     ret
 
-; ---------------------------
-; |     SUBROUTINE          |
-; ---------------------------
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
 ; Inputs: si - string pointer
 ; Used registers: ax, bx
 print_string:
@@ -61,4 +76,43 @@ print_string:
         jmp .next_char
 
     .done:
+        ret
+
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
+; Inputs: ax - number to convert
+; Outputs: si - pointer to the string
+; Used registers: ax, cx, dx, di
+number_to_string:
+    mov si, 10
+    mov cx, 1           ; degree counter
+
+    .calculate_next_digit:
+        xor dx, dx      ; remainder register
+        div si          ; ax / si = ax (remainder: dx in range [0;9])
+
+        add dl, 48
+        mov di, number_to_string_f_buff + 5
+        sub di, cx
+        mov [di], dl
+
+        inc cx
+
+        test ax, ax     ; check ax == 0
+        jne .calculate_next_digit
+
+    .find_number_start:
+        mov di, number_to_string_f_buff
+
+        .loop:
+            cmp byte [di], 0
+            jne .done
+
+            inc di
+            jmp .loop
+
+    .done:
+        mov si, di
         ret
