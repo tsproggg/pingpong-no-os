@@ -6,6 +6,7 @@ section .data
     success_msg db "Kernel successfully loaded", 13, 10, 0
 
     number_to_string_f_buff db 0,0,0,0,0,0
+    color_save db 0
 
 
 section .text
@@ -30,25 +31,25 @@ _start:
     ; clear screen
     call clear_screen
 
-;    mov ax, 0x12
-;    int 0x10
-;
-;    ; Example 1: Draw a green rectangle
-;    mov al, 2               ; green color
-;    mov bx, 14              ; x0 (left)
-;    mov cx, 100             ; x1 (right)
-;    mov dx, 50              ; y0 (top) - FIXED: top < bottom
-;    mov si, 250             ; y1 (bottom)
-;    call draw_filled_rectangle
-;
-;
-;    ; Go to video mode to see rectangle
-;    mov ah, 0x00
-;    int 0x16
-;
-;    ; Now switch back to text mode for the message
-;    mov ax, 0x03
-;    int 0x10
+    ; entering vga video mode 640x480 px
+    mov ax, 0x12
+    int 0x10
+
+    ; Example 1: Draw a green rectangle
+    mov al, 2               ; green color
+    mov bx, 14              ; x0 (left)
+    mov cx, 100             ; x1 (right)
+    mov dx, 50              ; y0 (top) - FIXED: top < bottom
+    mov si, 250             ; y1 (bottom)
+    call draw_filled_rectangle
+
+    ; Go to video mode to see rectangle
+    mov ah, 0x00
+    int 0x16
+
+    ; Now switch back to text mode for the message
+    mov ax, 0x03
+    int 0x10
 
     ; debug message
     mov si, success_msg
@@ -136,6 +137,60 @@ number_to_string:
 
     .done:
         mov si, di
+        ret
+
+
+; -----------------------------
+; |     SUBROUTINE: SCREEN    |
+; -----------------------------
+; Plot pixel  (mode 0x12: VGA 640 x 480)
+; Inputs: cx = x, dx = y, al = color
+; Used registers: ax, bx
+plot_pixel:
+    mov ah, 0Ch
+    mov bh, 0    ; prints on the visible page
+    int 10h
+    ret
+
+
+; -----------------------------
+; |     SUBROUTINE: SCREEN    |
+; -----------------------------
+; Inputs: bx = x0, cx = x1, dx = y0, si = y1, al = color
+; Used registers: ax, bx, cx, dx, si, bp, di
+draw_filled_rectangle:
+    ; Save the color separately since we'll be modifying AH
+    mov [color_save], al
+
+    mov bp, bx    ; bp = x0 (left)
+    mov di, cx    ; di = x1 (right)
+    mov bx, dx    ; bx = y0 (top)
+
+    ; bounds check
+    cmp di, bp
+    jb .done_restore
+    cmp si, bx
+    jb .done_restore
+
+    .y_loop:
+        mov dx, bx       ; DX = current y
+        mov cx, bp       ; CX = start at x0
+
+    .x_loop:
+        mov al, [color_save]  ; Reload color each time
+        mov ah, 0x0C           ; BIOS write pixel
+        mov bh, 0x00           ; page 0
+        int 0x10
+
+        inc cx
+        cmp cx, di
+        jle .x_loop
+
+        inc bx
+        cmp bx, si
+        jle .y_loop
+
+    .done_restore:
         ret
 
 
@@ -228,74 +283,3 @@ shutdown:
         cli
         hlt
         jmp $
-
-
-; -------------------------------------------------------------
-; |     SUBROUTINE: PLOT PIXEL  (mode 0x12: VGA 640 x 480)    |
-; -------------------------------------------------------------
-; Inputs: cx = x, dx = y, al = color
-; Used registers: ax, bx, cx
-
-plot_pixel:
-    mov ah, 0Ch
-    mov bh, 0    ; prints on the visible page
-    int 10h
-    ret
-
-
-; --------------------------------------------
-; |     SUBROUTINE: DRAW FILLED RECTANGLE    |
-; --------------------------------------------
-; Inputs: bx = x0, cx = x1, dx = y0, si = y1, ah = color
-; Used registers: ax, bx, cx, dx, si, bp, di, bh, ah
-draw_filled_rectangle:
-    push ax
-    push bx
-    push cx
-    push dx
-    push si
-    push di
-    push bp
-
-    ; Save the color separately since we'll be modifying AH
-    mov byte [.color_save], al
-
-    mov bp, bx    ; bp = x0 (left)
-    mov di, cx    ; di = x1 (right)
-    mov bx, dx    ; bx = y0 (top)
-
-    ; bounds check
-    cmp di, bp
-    jb .done_restore
-    cmp si, bx
-    jb .done_restore
-
-    .y_loop:
-        mov dx, bx       ; DX = current y
-        mov cx, bp       ; CX = start at x0
-
-    .x_loop:
-        mov al, [.color_save]  ; Reload color each time
-        mov ah, 0x0C           ; BIOS write pixel
-        mov bh, 0x00           ; page 0
-        int 0x10
-
-        inc cx
-        cmp cx, di
-        jle .x_loop
-
-        inc bx
-        cmp bx, si
-        jle .y_loop
-
-    .done_restore:
-        pop bp
-        pop di
-        pop si
-        pop dx
-        pop cx
-        pop bx
-        pop ax
-        ret
-
-    .color_save: db 0
