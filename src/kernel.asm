@@ -4,7 +4,6 @@ org 0x0000
 
 section .data
     success_msg db "Kernel successfully loaded", 13, 10, 0
-    ; key_msg db "Amongus" ; debug message for keyboard input
 
     number_to_string_f_buff db 0,0,0,0,0,0
 
@@ -28,38 +27,32 @@ _start:
     mov ax, cs
     mov ds, ax
 
-    mov ax, 0x12
-    int 0x10
-
-    ; Example 1: Draw a green rectangle
-    mov al, 2               ; green color
-    mov bx, 14              ; x0 (left)
-    mov cx, 100             ; x1 (right)
-    mov dx, 50              ; y0 (top) - FIXED: top < bottom
-    mov si, 250             ; y1 (bottom)
-    call draw_filled_rectangle
-
     ; clear screen
-    ;call clear_screen
+    call clear_screen
 
-    ; Go to video mode to see rectangle
-    mov ah, 0x00
-    int 0x16
-
-    ; Now switch back to text mode for the message
-    mov ax, 0x03
-    int 0x10
+;    mov ax, 0x12
+;    int 0x10
+;
+;    ; Example 1: Draw a green rectangle
+;    mov al, 2               ; green color
+;    mov bx, 14              ; x0 (left)
+;    mov cx, 100             ; x1 (right)
+;    mov dx, 50              ; y0 (top) - FIXED: top < bottom
+;    mov si, 250             ; y1 (bottom)
+;    call draw_filled_rectangle
+;
+;
+;    ; Go to video mode to see rectangle
+;    mov ah, 0x00
+;    int 0x16
+;
+;    ; Now switch back to text mode for the message
+;    mov ax, 0x03
+;    int 0x10
 
     ; debug message
     mov si, success_msg
     call print_string
-    ;call shutdown
-
-    ; [DEBUG] for testing keyboard input
-    ; .looping:    
-    ;     mov bl, ' '
-    ;     call print_on_key_press
-    ;     jmp .looping
 
     hlt
 
@@ -106,6 +99,7 @@ print_string:
     .done:
         ret
 
+
 ; -----------------------------------
 ; |     SUBROUTINE: SCREEN          |
 ; -----------------------------------
@@ -143,7 +137,10 @@ number_to_string:
     .done:
         mov si, di
         ret
+
+
 ; --------------------    KEYBOARD    --------------------
+
 ; -----------------------------------
 ; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
@@ -151,13 +148,10 @@ number_to_string:
 ;         si - message to print on key press
 ; Used registers: ax,bx,si
 print_on_key_press:
-    call read_key_status
-    jz .nothing_pressed
-    call read_character
+    call read_character_non_blocking
 
     cmp al, bl
     jne .nothing_pressed
-    mov si, key_msg    ; Do Some action when key is pressed
     call print_string
 
     .nothing_pressed:
@@ -167,22 +161,39 @@ print_on_key_press:
 ; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
 ; Inputs: none
+; Outputs: al - ASCII symbol code
 ; Used registers: ax
-read_character:
-    mov ah, 0x00
-    int 0x16
-    ret
+read_character_non_blocking:
+    call read_key_status
+    jz .nothing_pressed
+    call read_character_blocking
+
+    .nothing_pressed:
+       ret
+
 
 ; -----------------------------------
 ; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
 ; Inputs: none
+; Outputs: al - ASCII symbol code
+; Used registers: ax
+read_character_blocking:
+    mov ah, 0x00
+    int 0x16
+    ret
+
+
+; -----------------------------------
+; |     SUBROUTINE: KEYBOARD        |
+; -----------------------------------
+; Inputs: none
+; Output: ZF - zero flag (0 = keystroke available, 1 = buffer is empty)
 ; Used registers: ax
 read_key_status:
     mov ah, 0x01
     int 0x16
     ret
-
 
 
 ; --------------------    SYSTEM    --------------------
@@ -219,7 +230,6 @@ shutdown:
         jmp $
 
 
-
 ; -------------------------------------------------------------
 ; |     SUBROUTINE: PLOT PIXEL  (mode 0x12: VGA 640 x 480)    |
 ; -------------------------------------------------------------
@@ -233,13 +243,11 @@ plot_pixel:
     ret
 
 
-
 ; --------------------------------------------
 ; |     SUBROUTINE: DRAW FILLED RECTANGLE    |
 ; --------------------------------------------
 ; Inputs: bx = x0, cx = x1, dx = y0, si = y1, ah = color
 ; Used registers: ax, bx, cx, dx, si, bp, di, bh, ah
-
 draw_filled_rectangle:
     push ax
     push bx
@@ -262,32 +270,32 @@ draw_filled_rectangle:
     cmp si, bx
     jb .done_restore
 
-.y_loop:
-    mov dx, bx       ; DX = current y
-    mov cx, bp       ; CX = start at x0
+    .y_loop:
+        mov dx, bx       ; DX = current y
+        mov cx, bp       ; CX = start at x0
 
-.x_loop:
-    mov al, [.color_save]  ; Reload color each time
-    mov ah, 0x0C           ; BIOS write pixel
-    mov bh, 0x00           ; page 0
-    int 0x10
+    .x_loop:
+        mov al, [.color_save]  ; Reload color each time
+        mov ah, 0x0C           ; BIOS write pixel
+        mov bh, 0x00           ; page 0
+        int 0x10
 
-    inc cx
-    cmp cx, di
-    jle .x_loop
+        inc cx
+        cmp cx, di
+        jle .x_loop
 
-    inc bx
-    cmp bx, si
-    jle .y_loop
+        inc bx
+        cmp bx, si
+        jle .y_loop
 
-.done_restore:
-    pop bp
-    pop di
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-    ret
+    .done_restore:
+        pop bp
+        pop di
+        pop si
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+        ret
 
-.color_save: db 0
+    .color_save: db 0
