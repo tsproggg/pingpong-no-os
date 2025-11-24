@@ -58,7 +58,7 @@ _start:
     ; [DEBUG] for testing keyboard input
     ; .looping:    
     ;     mov bl, ' '
-    ;     call keyboard_event
+    ;     call print_on_key_press
     ;     jmp .looping
 
     hlt
@@ -150,31 +150,41 @@ number_to_string:
 ; -----------------------------------
 ; |     SUBROUTINE: SYSTEM          |
 ; -----------------------------------
-; Inputs: bl - key to check
-; Used registers: ax,si
-keyboard_event:
-    .check_keypress:
-        call .read_key_status
-        jz .nothing_pressed
-        call .read_character
+; Inputs: bl - key to check 
+;         si - message to print on key press
+; Used registers: ax,bx,si
+print_on_key_press:
+    call read_key_status
+    jz .nothing_pressed
+    call read_character
 
-        cmp al, bl
-        jne .nothing_pressed
-        ; mov si, key_msg    ; Do Some action when key is pressed
-        ; call print_string
+    cmp al, bl
+    jne .nothing_pressed
+    mov si, key_msg    ; Do Some action when key is pressed
+    call print_string
 
     .nothing_pressed:
         ret
 
-    .read_character:
-        mov ah, 0x00
-        int 0x16
-        ret
+; -----------------------------------
+; |     SUBROUTINE: SYSTEM          |
+; -----------------------------------
+; Inputs: none
+; Used registers: ax
+read_character:
+    mov ah, 0x00
+    int 0x16
+    ret
 
-    .read_key_status:
-        mov ah, 0x01
-        int 0x16
-        ret
+; -----------------------------------
+; |     SUBROUTINE: SYSTEM          |
+; -----------------------------------
+; Inputs: none
+; Used registers: ax
+read_key_status:
+    mov ah, 0x01
+    int 0x16
+    ret
 
 ; -----------------------------------
 ; |     SUBROUTINE: SYSTEM          |
