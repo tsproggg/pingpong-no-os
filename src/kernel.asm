@@ -4,6 +4,7 @@ org 0x0000
 
 section .data
     success_msg db "Kernel successfully loaded", 13, 10, 0
+    ; key_msg db "Amongus" ; debug message for keyboard input
 
     number_to_string_f_buff db 0,0,0,0,0,0
 
@@ -34,6 +35,13 @@ _start:
     mov si, success_msg
     call print_string
     ;call shutdown
+
+    ; [DEBUG] for testing keyboard input
+    ; .looping:    
+    ;     mov bl, ' '
+    ;     call keyboard_event
+    ;     jmp .looping
+
     hlt
 
 ; --------------------    SCREEN    --------------------
@@ -119,6 +127,35 @@ number_to_string:
 
 
 ; --------------------    SYSTEM    --------------------
+
+; -----------------------------------
+; |     SUBROUTINE: SYSTEM          |
+; -----------------------------------
+; Inputs: bl - key to check
+; Used registers: ax,si
+keyboard_event:
+    .check_keypress:
+        call .read_key_status
+        jz .nothing_pressed
+        call .read_character
+
+        cmp al, bl
+        jne .nothing_pressed
+        ; mov si, key_msg    ; Do Some action when key is pressed
+        ; call print_string
+
+    .nothing_pressed:
+        ret
+
+    .read_character:
+        mov ah, 0x00
+        int 0x16
+        ret
+
+    .read_key_status:
+        mov ah, 0x01
+        int 0x16
+        ret
 
 ; -----------------------------------
 ; |     SUBROUTINE: SYSTEM          |
