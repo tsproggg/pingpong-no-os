@@ -143,12 +143,9 @@ number_to_string:
     .done:
         mov si, di
         ret
-
-
-; --------------------    SYSTEM    --------------------
-
+; --------------------    KEYBOARD    --------------------
 ; -----------------------------------
-; |     SUBROUTINE: SYSTEM          |
+; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
 ; Inputs: bl - key to check 
 ;         si - message to print on key press
@@ -167,7 +164,7 @@ print_on_key_press:
         ret
 
 ; -----------------------------------
-; |     SUBROUTINE: SYSTEM          |
+; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
 ; Inputs: none
 ; Used registers: ax
@@ -177,7 +174,7 @@ read_character:
     ret
 
 ; -----------------------------------
-; |     SUBROUTINE: SYSTEM          |
+; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
 ; Inputs: none
 ; Used registers: ax
@@ -186,6 +183,9 @@ read_key_status:
     int 0x16
     ret
 
+
+
+; --------------------    SYSTEM    --------------------
 ; -----------------------------------
 ; |     SUBROUTINE: SYSTEM          |
 ; -----------------------------------
