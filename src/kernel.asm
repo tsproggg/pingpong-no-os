@@ -45,19 +45,14 @@ _start:
     mov si, 250             ; y1 (bottom)
     call draw_filled_rectangle
 
-    ; Go to video mode to see rectangle
-    mov ah, 0x00
-    int 0x16
-
-    ; Now switch back to text mode for the message
-    mov ax, 0x03
-    int 0x10
-
     ; debug message
     mov si, success_msg
-    call print_string
+    call print_string_graphics
 
-    hlt
+    .infinite_loop:
+        hlt
+        jmp .infinite_loop
+
 
 ; --------------------    SCREEN    --------------------
 
@@ -84,18 +79,24 @@ clear_screen:
 ; |     SUBROUTINE: SCREEN          |
 ; -----------------------------------
 ; Inputs: si - string pointer
-; Used registers: ax, bx
-print_string:
+; Used registers: ax, bx, dx, si
+print_string_graphics:
+    mov ah, 0x02    ; set cursor position
+    mov bh, 0x00    ; page 0
+    mov dh, 1       ; row (adjust as needed)
+    mov dl, 3       ; column (adjust as needed)
+    int 0x10
+
+    ; Print the string using BIOS teletype function
+    mov ah, 0x0E    ; BIOS teletype output
+    mov bh, 0       ; page 0
+    mov bl, 0x0F    ; white color on black background
+
     .next_char:
         mov al, [si]
         cmp al, 0
         je .done
-
-        mov ah, 0x0E  ; BIOS interrupt teletype output
-        mov bh, 0x00  ; page number (usually 0)
-        mov bl, 0x00  ; BL = foreground color (optional, often ignored by QEMU's simple VGA)
-        int 0x10 ; Call the BIOS video interrupt
-
+        int 0x10
         inc si
         jmp .next_char
 
@@ -212,7 +213,7 @@ print_on_key_press:
 
     cmp al, bl
     jne .nothing_pressed
-    call print_string
+    call print_string_graphics
 
     .nothing_pressed:
         ret
