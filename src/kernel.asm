@@ -6,7 +6,9 @@ section .data
     success_msg db "Kernel successfully loaded", 13, 10, 0
 
     number_to_string_f_buff db 0,0,0,0,0,0
-    color_save db 0
+    draw_filled_rectangle_f_color db 0
+    rectangle_x1: dw 0
+    rectangle_y1: dw 0
 
 
 section .text
@@ -156,41 +158,44 @@ plot_pixel:
 ; -----------------------------
 ; |     SUBROUTINE: SCREEN    |
 ; -----------------------------
-; Inputs: bx = x0, cx = x1, dx = y0, si = y1, al = color
-; Used registers: ax, bx, cx, dx, si, bp, di
+; Inputs: bx = x0, cx = x1, dx = y0, si = y1,
+; Used registers: ax, bx, cx, dx, si, di
+
 draw_filled_rectangle:
-    ; Save the color separately since we'll be modifying AH
-    mov [color_save], al
+    ; Save parameters since we'll be modifying registers
+    mov [draw_filled_rectangle_f_color], al
+    mov [rectangle_x1], cx  ; Save x1
+    mov [rectangle_y1], si  ; Save y1
 
-    mov bp, bx    ; bp = x0 (left)
-    mov di, cx    ; di = x1 (right)
-    mov bx, dx    ; bx = y0 (top)
+    ; Validate bounds
+    cmp cx, bx      ; if x1 < x0, exit
+    jb .done
+    cmp si, dx      ; if y1 < y0, exit
+    jb .done
 
-    ; bounds check
-    cmp di, bp
-    jb .done_restore
-    cmp si, bx
-    jb .done_restore
+    mov ah, 0x0C    ; BIOS write pixel function
+    mov bh, 0       ; Page 0
+
+    mov di, dx      ; DI = current y (start at y0)
 
     .y_loop:
-        mov dx, bx       ; DX = current y
-        mov cx, bp       ; CX = start at x0
+        mov cx, bx      ; CX = current x (start at x0 for each row)
 
     .x_loop:
-        mov al, [color_save]  ; Reload color each time
-        mov ah, 0x0C           ; BIOS write pixel
-        mov bh, 0x00           ; page 0
+        mov al, [draw_filled_rectangle_f_color]
+        mov dx, di      ; DX = current y
+        ; CX already has current x
         int 0x10
 
         inc cx
-        cmp cx, di
+        cmp cx, [rectangle_x1]
         jle .x_loop
 
-        inc bx
-        cmp bx, si
+        inc di
+        cmp di, [rectangle_y1]
         jle .y_loop
 
-    .done_restore:
+    .done:
         ret
 
 
@@ -199,7 +204,7 @@ draw_filled_rectangle:
 ; -----------------------------------
 ; |     SUBROUTINE: KEYBOARD        |
 ; -----------------------------------
-; Inputs: bl - key to check 
+; Inputs: bl - key to check
 ;         si - message to print on key press
 ; Used registers: ax,bx,si
 print_on_key_press:
