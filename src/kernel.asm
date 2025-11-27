@@ -12,6 +12,10 @@ section .data
     rectangle_x1: dw 0
     rectangle_y1: dw 0
 
+    ball_x: dw 320          ; Ball starting x position (center of screen)
+    ball_y: dw 240          ; Ball starting y position (center of screen)
+    ball_size: dw 8         ; Ball size (8x8 pixels)
+
     player_x: dw 14
     player_y: dw 50
 
@@ -66,6 +70,9 @@ _start:
         add si, 20              ; y1 = y0 + height
         call draw_filled_rectangle
 
+        ; draw a ball
+        call draw_ball
+
         ; ----- Read keyboard -----
         call read_character_non_blocking
         cmp al, 97              ; 'a' - move left
@@ -73,7 +80,7 @@ _start:
         cmp al, 100             ; 'd' - move right
         je .d_pressed
 
-        jmp .infinite_loop
+        jmp .loop
 
     ; ===========================
     ;   A KEY PRESSED (MOVE RIGHT)
@@ -104,7 +111,7 @@ _start:
         add si, 20              ; Calculate y1
         call draw_filled_rectangle
 
-        jmp .infinite_loop
+        jmp .loop
 
     ; ===========================
     ;   D KEY PRESSED (MOVE LEFT)
@@ -135,7 +142,7 @@ _start:
         add si, 20              ; Calculate y1
         call draw_filled_rectangle
 
-        jmp .infinite_loop
+        jmp .loop
 
 ; --------------------    SCREEN    --------------------
 
@@ -276,6 +283,47 @@ draw_filled_rectangle:
 
     .done:
         ret
+
+
+
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
+; Draw ball at current position
+; Inputs: none (uses ball_x, ball_y, ball_size from .data)
+; Used registers: ax, bx, cx, dx, si
+draw_ball:
+    mov al, 15              ; white color for ball
+    mov bx, [ball_x]        ; x0 (left)
+    mov cx, bx
+    add cx, [ball_size]     ; x1 = x0 + size
+    mov dx, [ball_y]        ; y0 (top)
+    mov si, dx
+    add si, [ball_size]     ; y1 = y0 + size
+    call draw_filled_rectangle
+    ret
+
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
+; Erase ball at current position (draw black square)
+; Inputs: none (uses ball_x, ball_y, ball_size from .data)
+; Used registers: ax, bx, cx, dx, si
+erase_ball:
+    mov al, 0               ; black color
+    mov bx, [ball_x]        ; x0 (left)
+    mov cx, bx
+    add cx, [ball_size]     ; x1 = x0 + size
+    mov dx, [ball_y]        ; y0 (top)
+    mov si, dx
+    add si, [ball_size]     ; y1 = y0 + size
+    call draw_filled_rectangle
+    ret
+
+
+
 ; --------------------    KEYBOARD    --------------------
 
 ; -----------------------------------
