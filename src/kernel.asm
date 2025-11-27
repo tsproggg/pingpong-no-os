@@ -7,9 +7,13 @@ section .data
 
     number_to_string_f_buff db 0,0,0,0,0,0
     draw_filled_rectangle_f_color db 0
+    rectangle_x0: dw 0
+    rectangle_y0: dw 0
     rectangle_x1: dw 0
     rectangle_y1: dw 0
 
+    player_x: dw 14
+    player_y: dw 50
 
 section .text
     global _start
@@ -38,21 +42,100 @@ _start:
     int 0x10
 
     ; Example 1: Draw a green rectangle
-    mov al, 2               ; green color
-    mov bx, 14              ; x0 (left)
-    mov cx, 100             ; x1 (right)
-    mov dx, 50              ; y0 (top) - FIXED: top < bottom
-    mov si, 250             ; y1 (bottom)
-    call draw_filled_rectangle
+
 
     ; debug message
     mov si, success_msg
     call print_string_graphics
 
-    .infinite_loop:
-        hlt
+; -----------------------------------
+; |     SUBROUTINE: DEMO_LOOP       |
+; -----------------------------------
+; Inputs: none
+; Used registers: all
+
+.demo_loop:
+    .loop:
+        ; ----- Draw player normally -----
+        mov al, 2               ; green color
+        mov bx, [player_x]      ; x0 (left)
+        mov cx, bx
+        add cx, 20              ; x1 = x0 + width
+        mov dx, [player_y]      ; y0 (top)
+        mov si, dx
+        add si, 20              ; y1 = y0 + height
+        call draw_filled_rectangle
+
+        ; ----- Read keyboard -----
+        call read_character_non_blocking
+        cmp al, 97              ; 'a' - move left
+        je .a_pressed
+        cmp al, 100             ; 'd' - move right
+        je .d_pressed
+
         jmp .infinite_loop
 
+    ; ===========================
+    ;   A KEY PRESSED (MOVE RIGHT)
+    ; ===========================
+    .a_pressed:
+        ; 1) ERASE OLD RECTANGLE (black)
+        mov al, 0               ; black color
+        mov bx, [player_x]      ; Load current x
+        mov cx, bx
+        add cx, 20              ; Calculate x1
+        mov dx, [player_y]      ; Load current y
+        mov si, dx
+        add si, 20              ; Calculate y1
+        call draw_filled_rectangle
+
+        ; 2) UPDATE POSITION (move right)
+        mov bx, [player_x]
+        inc bx                  ; Move right by 1 pixel
+        mov [player_x], bx
+
+        ; 3) DRAW NEW RECTANGLE (green)
+        mov al, 2               ; green
+        mov bx, [player_x]      ; Load NEW x
+        mov cx, bx
+        add cx, 20              ; Calculate x1
+        mov dx, [player_y]      ; Load y
+        mov si, dx
+        add si, 20              ; Calculate y1
+        call draw_filled_rectangle
+
+        jmp .infinite_loop
+
+    ; ===========================
+    ;   D KEY PRESSED (MOVE LEFT)
+    ; ===========================
+    .d_pressed:
+        ; 1) ERASE OLD RECTANGLE (black)
+        mov al, 0               ; black color
+        mov bx, [player_x]      ; Load current x
+        mov cx, bx
+        add cx, 20              ; Calculate x1
+        mov dx, [player_y]      ; Load current y
+        mov si, dx
+        add si, 20              ; Calculate y1
+        call draw_filled_rectangle
+
+        ; 2) UPDATE POSITION (move left)
+        mov bx, [player_x]
+        dec bx                  ; Move left by 1 pixel
+        mov [player_x], bx
+
+        ; 3) DRAW NEW RECTANGLE (green)
+        mov al, 2               ; green
+        mov bx, [player_x]      ; Load NEW x
+        mov cx, bx
+        add cx, 20              ; Calculate x1
+        mov dx, [player_y]      ; Load y
+        mov si, dx
+        add si, 20              ; Calculate y1
+        call draw_filled_rectangle
+
+        jmp .infinite_loop
 
 ; --------------------    SCREEN    --------------------
 
@@ -163,10 +246,12 @@ plot_pixel:
 ; Used registers: ax, bx, cx, dx, si, di
 
 draw_filled_rectangle:
-    ; Save parameters since we'll be modifying registers
+    ; Save ALL parameters to memory
     mov [draw_filled_rectangle_f_color], al
-    mov [rectangle_x1], cx  ; Save x1
-    mov [rectangle_y1], si  ; Save y1
+    mov [rectangle_x0], bx
+    mov [rectangle_x1], cx
+    mov [rectangle_y0], dx
+    mov [rectangle_y1], si
 
     ; Validate bounds
     cmp cx, bx      ; if x1 < x0, exit
@@ -177,10 +262,10 @@ draw_filled_rectangle:
     mov ah, 0x0C    ; BIOS write pixel function
     mov bh, 0       ; Page 0
 
-    mov di, dx      ; DI = current y (start at y0)
+    mov di, [rectangle_y0]  ; DI = current y (start at y0)
 
     .y_loop:
-        mov cx, bx      ; CX = current x (start at x0 for each row)
+        mov cx, [rectangle_x0]  ; CX = current x (RELOAD from memory each row!)
 
     .x_loop:
         mov al, [draw_filled_rectangle_f_color]
@@ -190,16 +275,14 @@ draw_filled_rectangle:
 
         inc cx
         cmp cx, [rectangle_x1]
-        jle .x_loop
+        jbe .x_loop     ; unsigned comparison
 
         inc di
         cmp di, [rectangle_y1]
-        jle .y_loop
+        jbe .y_loop     ; unsigned comparison
 
     .done:
         ret
-
-
 ; --------------------    KEYBOARD    --------------------
 
 ; -----------------------------------
