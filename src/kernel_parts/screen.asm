@@ -119,10 +119,12 @@ plot_pixel:
 ; Used registers: ax, bx, cx, dx, si, di
 
 draw_filled_rectangle:
-    ; Save parameters since we'll be modifying registers
+    ; Save ALL parameters to memory
     mov [draw_filled_rectangle_f_color], al
-    mov [rectangle_x1], cx  ; Save x1
-    mov [rectangle_y1], si  ; Save y1
+    mov [rectangle_x0], bx
+    mov [rectangle_x1], cx
+    mov [rectangle_y0], dx
+    mov [rectangle_y1], si
 
     ; Validate bounds
     cmp cx, bx      ; if x1 < x0, exit
@@ -133,10 +135,10 @@ draw_filled_rectangle:
     mov ah, 0x0C    ; BIOS write pixel function
     mov bh, 0       ; Page 0
 
-    mov di, dx      ; DI = current y (start at y0)
+    mov di, [rectangle_y0]  ; DI = current y (start at y0)
 
     .y_loop:
-        mov cx, bx      ; CX = current x (start at x0 for each row)
+        mov cx, [rectangle_x0]  ; CX = current x (RELOAD from memory each row!)
 
     .x_loop:
         mov al, [draw_filled_rectangle_f_color]
@@ -146,12 +148,34 @@ draw_filled_rectangle:
 
         inc cx
         cmp cx, [rectangle_x1]
-        jle .x_loop
+        jbe .x_loop     ; unsigned comparison
 
         inc di
         cmp di, [rectangle_y1]
-        jle .y_loop
+        jbe .y_loop     ; unsigned comparison
 
     .done:
         ret
 
+; --------------------    SCREEN    --------------------
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
+; Inputs: none
+; Used registers: ax, dx
+; Wait for vertical retrace to prevent flickering
+; Reads VGA status register (port 0x3DA) and waits for vertical blanking period
+wait_vsync:
+    mov dx, 0x3DA
+    ; First, wait until we're NOT in vertical retrace (bit 3 = 0)
+    .wait_not_vretrace:
+        in al, dx
+        test al, 8           ; Test bit 3 (vertical retrace bit)
+        jnz .wait_not_vretrace
+    ; Then wait until we ARE in vertical retrace (bit 3 = 1)
+    .wait_vretrace:
+        in al, dx
+        test al, 8
+        jz .wait_vretrace
+    ret

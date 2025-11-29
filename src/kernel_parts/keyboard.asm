@@ -54,3 +54,37 @@ read_key_status:
     int 0x16
     ret
 
+
+; -------------------------------------
+; |     SUBROUTINE: KEYBOARD         |
+; -------------------------------------
+; Inputs: none
+; Output: al - scan code of the pressed key
+read_keyboard:
+    call read_character_non_blocking
+    cmp al, 119
+    je .w_pressed
+    cmp al, 115
+    je .s_pressed
+    cmp al, 48h
+    je .uparrow_pressed
+    cmp al, 50h
+    je .downarrow_pressed
+
+    jmp .done
+
+    .w_pressed:
+        call move_paddle_1_up
+        jmp .done
+    .s_pressed:
+        call move_paddle_1_down
+        jmp .done
+    .uparrow_pressed
+        call move_paddle_2_up
+        jmp .done
+    .downarrow_pressed
+        call move_paddle_2_down
+        jmp .done
+
+    .done:
+        ret
