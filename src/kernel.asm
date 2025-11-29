@@ -12,9 +12,9 @@ section .data
     ; ---- game ----
 
     ; ball
-    ball_x: dw 320          ; Ball starting x position (center of screen)
-    ball_y: dw 240          ; Ball starting y position (center of screen)
-    ball_size equ 8         ; Ball size (8x8 pixels)
+    ball_x: dw 320          ; Ball x position (center of screen)
+    ball_y: dw 240          ; Ball y position (center of screen)
+    ball_radius equ 4         ; Ball size (8x8 pixels)
 
     ; player
     player_x: dw 14
@@ -301,39 +301,47 @@ shutdown:
 ; |     SUBROUTINE: GAME: BALL          |
 ; ---------------------------------------
 ; Draw ball at current position
-; Inputs: none (uses ball_x, ball_y, ball_size from .data)
+; Inputs: none
 ; Used registers: ax, bx, cx, dx, si, di
 draw_ball:
-    mov al, 15              ; white color for ball
-
-    mov bx, [ball_x]        ; x0 (left)
-    mov cx, bx
-    add cx, ball_size     ; x1 = x0 + size
-
-    mov dx, [ball_y]        ; y0 (top)
-    mov si, dx
-    add si, ball_size     ; y1 = y0 + size
-
-    call draw_filled_rectangle
+    mov al, 15
+    call redraw_ball
     ret
 
 
 ; ---------------------------------------
 ; |     SUBROUTINE: GAME: BALL          |
 ; ---------------------------------------
-; Erase ball at current position (draw black square)
-; Inputs: none (uses ball_x, ball_y, ball_size from .data)
-; Used registers: ax, bx, cx, dx, si
+; Draw ball at current position
+; Inputs: none
+; Used registers: ax, bx, cx, dx, si, di
 erase_ball:
-    mov al, 0               ; black color
+    mov al, 0
+    call redraw_ball
+    ret
 
-    mov bx, [ball_x]        ; x0 (left)
-    mov cx, bx
-    add cx, ball_size     ; x1 = x0 + size
+; ---------------------------------------
+; |     SUBROUTINE: GAME: BALL          |
+; ---------------------------------------
+; Draw ball at current position
+; Inputs:
+;    al - color
+;    uses ball_x, ball_y, ball_radius
+; Used registers: ax, bx, cx, dx, si, di
+redraw_ball:
+    mov al, 15              ; white color for ball
 
-    mov dx, [ball_y]        ; y0 (top)
-    mov si, dx
-    add si, ball_size     ; y1 = y0 + size
+    mov bx, [ball_x]
+    sub bx, ball_radius     ; x0
+
+    mov cx, [ball_x]
+    add cx, ball_radius     ; x1
+
+    mov dx, [ball_y]
+    sub dx, ball_radius     ; y0
+
+    mov si, [ball_y]
+    add si, ball_radius     ; y1
 
     call draw_filled_rectangle
     ret
@@ -344,33 +352,41 @@ erase_ball:
 ; --------------------------------------
 ; |     SUBROUTINE: GAME: PLAYER       |
 ; --------------------------------------
-; Inputs: none  (player_x, player_y from .data)
+; Inputs: none
+;   (player_x, player_y from .data)
 ; Used registers: ax, bx, cx, dx, si, di
 draw_player:
-    mov al, 2               ; green color
-    mov bx, [player_x]      ; x0 (left)
-    mov cx, bx
-    add cx, 20              ; x1 = x0 + width
-    mov dx, [player_y]      ; y0 (top)
-    mov si, dx
-    add si, 20              ; y1 = y0 + height
-    call draw_filled_rectangle
+    mov al, 2       ; green color
+    call redraw_player
     ret
 
 
 ; --------------------------------------
 ; |     SUBROUTINE: GAME: PLAYER       |
 ; --------------------------------------
-; Inputs: none  (player_x, player_y from .data)
+; Inputs: none
+;   (player_x, player_y from .data)
 ; Used registers: ax, bx, cx, dx, si, di
 erase_player:
-    mov al, 0               ; black color
-    mov bx, [player_x]      ; Load current x
+    mov al, 0       ; black color
+    call redraw_player
+    ret
+
+
+; --------------------------------------
+; |     SUBROUTINE: GAME: PLAYER       |
+; --------------------------------------
+; Inputs:
+;   al - color
+;   (player_x, player_y from .data)
+; Used registers: ax, bx, cx, dx, si, di
+redraw_player:
+    mov bx, [player_x]      ; x0 (left)
     mov cx, bx
-    add cx, 20              ; Calculate x1
-    mov dx, [player_y]      ; Load current y
+    add cx, 20              ; x1 = x0 + width
+    mov dx, [player_y]      ; y0 (top)
     mov si, dx
-    add si, 20              ; Calculate y1
+    add si, 20              ; y1 = y0 + height
     call draw_filled_rectangle
     ret
 
