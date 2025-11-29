@@ -7,7 +7,7 @@
 ; Inputs: none
 ; Used registers: ax, bx, cx, dx, si, di
 draw_ball:
-    mov al, 15
+    mov al, WHITE_COLOR
     call redraw_ball
     ret
 
@@ -19,7 +19,7 @@ draw_ball:
 ; Inputs: none
 ; Used registers: ax, bx, cx, dx, si, di
 erase_ball:
-    mov al, 0
+    mov al, BLACK_COLOR
     call redraw_ball
     ret
 
