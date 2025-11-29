@@ -3,16 +3,23 @@ org 0x0000
 
 
 section .data
+    ; ---- debug  ----
     success_msg db "Kernel successfully loaded", 13, 10, 0
 
+    ; ---- functions ----
     number_to_string_f_buff db 0,0,0,0,0,0
 
+    ; ---- game ----
+
+    ; ball
     ball_x: dw 320          ; Ball starting x position (center of screen)
     ball_y: dw 240          ; Ball starting y position (center of screen)
-    ball_size: dw 8         ; Ball size (8x8 pixels)
+    ball_size equ 8         ; Ball size (8x8 pixels)
 
+    ; player
     player_x: dw 14
     player_y: dw 50
+    player_movement_speed equ 5
 
 
 section .text
@@ -41,104 +48,8 @@ _start:
     mov ax, 0x12
     int 0x10
 
-    ; Example 1: Draw a green rectangle
+    jmp game_loop
 
-
-    ; debug message
-    mov si, success_msg
-    call print_string_graphics
-
-
-; -----------------------------------
-; |     SUBROUTINE: DEMO_LOOP       |
-; -----------------------------------
-; Inputs: none
-; Used registers: ax, bx, cx, dx, si, di
-.demo_loop:
-    .loop:
-        ; ----- Draw player normally -----
-        mov al, 2               ; green color
-        mov bx, [player_x]      ; x0 (left)
-        mov cx, bx
-        add cx, 20              ; x1 = x0 + width
-        mov dx, [player_y]      ; y0 (top)
-        mov si, dx
-        add si, 20              ; y1 = y0 + height
-        call draw_filled_rectangle
-
-        ; draw a ball
-        call draw_ball
-
-        ; ----- Read keyboard -----
-        call read_character_non_blocking
-        cmp al, 97              ; 'a' - move left
-        je .a_pressed
-        cmp al, 100             ; 'd' - move right
-        je .d_pressed
-
-        jmp .loop
-
-    ; ===========================
-    ;   A KEY PRESSED (MOVE RIGHT)
-    ; ===========================
-    .a_pressed:
-        ; 1) ERASE OLD RECTANGLE (black)
-        mov al, 0               ; black color
-        mov bx, [player_x]      ; Load current x
-        mov cx, bx
-        add cx, 20              ; Calculate x1
-        mov dx, [player_y]      ; Load current y
-        mov si, dx
-        add si, 20              ; Calculate y1
-        call draw_filled_rectangle
-
-        ; 2) UPDATE POSITION (move right)
-        mov bx, [player_x]
-        inc bx                  ; Move right by 1 pixel
-        mov [player_x], bx
-
-        ; 3) DRAW NEW RECTANGLE (green)
-        mov al, 2               ; green
-        mov bx, [player_x]      ; Load NEW x
-        mov cx, bx
-        add cx, 20              ; Calculate x1
-        mov dx, [player_y]      ; Load y
-        mov si, dx
-        add si, 20              ; Calculate y1
-        call draw_filled_rectangle
-
-        jmp .loop
-
-    ; ===========================
-    ;   D KEY PRESSED (MOVE LEFT)
-    ; ===========================
-    .d_pressed:
-        ; 1) ERASE OLD RECTANGLE (black)
-        mov al, 0               ; black color
-        mov bx, [player_x]      ; Load current x
-        mov cx, bx
-        add cx, 20              ; Calculate x1
-        mov dx, [player_y]      ; Load current y
-        mov si, dx
-        add si, 20              ; Calculate y1
-        call draw_filled_rectangle
-
-        ; 2) UPDATE POSITION (move left)
-        mov bx, [player_x]
-        dec bx                  ; Move left by 1 pixel
-        mov [player_x], bx
-
-        ; 3) DRAW NEW RECTANGLE (green)
-        mov al, 2               ; green
-        mov bx, [player_x]      ; Load NEW x
-        mov cx, bx
-        add cx, 20              ; Calculate x1
-        mov dx, [player_y]      ; Load y
-        mov si, dx
-        add si, 20              ; Calculate y1
-        call draw_filled_rectangle
-
-        jmp .loop
 
 ; --------------------    SCREEN    --------------------
 
@@ -290,43 +201,6 @@ draw_filled_rectangle:
         pop bp
         ret
 
-
-; -----------------------------------
-; |     SUBROUTINE: SCREEN          |
-; -----------------------------------
-; Draw ball at current position
-; Inputs: none (uses ball_x, ball_y, ball_size from .data)
-; Used registers: ax, bx, cx, dx, si
-draw_ball:
-    mov al, 15              ; white color for ball
-    mov bx, [ball_x]        ; x0 (left)
-    mov cx, bx
-    add cx, [ball_size]     ; x1 = x0 + size
-    mov dx, [ball_y]        ; y0 (top)
-    mov si, dx
-    add si, [ball_size]     ; y1 = y0 + size
-    call draw_filled_rectangle
-    ret
-
-
-; -----------------------------------
-; |     SUBROUTINE: SCREEN          |
-; -----------------------------------
-; Erase ball at current position (draw black square)
-; Inputs: none (uses ball_x, ball_y, ball_size from .data)
-; Used registers: ax, bx, cx, dx, si
-erase_ball:
-    mov al, 0               ; black color
-    mov bx, [ball_x]        ; x0 (left)
-    mov cx, bx
-    add cx, [ball_size]     ; x1 = x0 + size
-    mov dx, [ball_y]        ; y0 (top)
-    mov si, dx
-    add si, [ball_size]     ; y1 = y0 + size
-    call draw_filled_rectangle
-    ret
-
-
 ; --------------------    KEYBOARD    --------------------
 
 ; -----------------------------------
@@ -417,3 +291,131 @@ shutdown:
         cli
         hlt
         jmp $
+
+
+; ---------------------    GAME    ---------------------
+
+; ------------------    GAME: BALL    ------------------
+
+; ---------------------------------------
+; |     SUBROUTINE: GAME: BALL          |
+; ---------------------------------------
+; Draw ball at current position
+; Inputs: none (uses ball_x, ball_y, ball_size from .data)
+; Used registers: ax, bx, cx, dx, si, di
+draw_ball:
+    mov al, 15              ; white color for ball
+
+    mov bx, [ball_x]        ; x0 (left)
+    mov cx, bx
+    add cx, ball_size     ; x1 = x0 + size
+
+    mov dx, [ball_y]        ; y0 (top)
+    mov si, dx
+    add si, ball_size     ; y1 = y0 + size
+
+    call draw_filled_rectangle
+    ret
+
+
+; ---------------------------------------
+; |     SUBROUTINE: GAME: BALL          |
+; ---------------------------------------
+; Erase ball at current position (draw black square)
+; Inputs: none (uses ball_x, ball_y, ball_size from .data)
+; Used registers: ax, bx, cx, dx, si
+erase_ball:
+    mov al, 0               ; black color
+
+    mov bx, [ball_x]        ; x0 (left)
+    mov cx, bx
+    add cx, ball_size     ; x1 = x0 + size
+
+    mov dx, [ball_y]        ; y0 (top)
+    mov si, dx
+    add si, ball_size     ; y1 = y0 + size
+
+    call draw_filled_rectangle
+    ret
+
+
+; -----------------    GAME: PLAYER    -----------------
+
+; --------------------------------------
+; |     SUBROUTINE: GAME: PLAYER       |
+; --------------------------------------
+; Inputs: none  (player_x, player_y from .data)
+; Used registers: ax, bx, cx, dx, si, di
+draw_player:
+    mov al, 2               ; green color
+    mov bx, [player_x]      ; x0 (left)
+    mov cx, bx
+    add cx, 20              ; x1 = x0 + width
+    mov dx, [player_y]      ; y0 (top)
+    mov si, dx
+    add si, 20              ; y1 = y0 + height
+    call draw_filled_rectangle
+    ret
+
+
+; --------------------------------------
+; |     SUBROUTINE: GAME: PLAYER       |
+; --------------------------------------
+; Inputs: none  (player_x, player_y from .data)
+; Used registers: ax, bx, cx, dx, si, di
+erase_player:
+    mov al, 0               ; black color
+    mov bx, [player_x]      ; Load current x
+    mov cx, bx
+    add cx, 20              ; Calculate x1
+    mov dx, [player_y]      ; Load current y
+    mov si, dx
+    add si, 20              ; Calculate y1
+    call draw_filled_rectangle
+    ret
+
+
+; ------------------    GAME: LOOP    ------------------
+
+; ------------------------------------
+; |     SUBROUTINE: GAME: LOOP       |
+; ------------------------------------
+; Inputs: none
+; Used registers: ax, bx, cx, dx, si, di
+game_loop:
+    .init:
+        call draw_player
+        call draw_ball
+
+    .loop:
+        ; ----- Read keyboard -----
+        call read_character_non_blocking
+
+        cmp al, 97              ; 'a' - move left
+        je .a_pressed
+        cmp al, 100             ; 'd' - move right
+        je .d_pressed
+
+        jmp .loop
+
+    ; ===========================
+    ;   A KEY PRESSED (MOVE LEFT)
+    ; ===========================
+    .a_pressed:
+        call erase_player
+
+        sub word [player_x], player_movement_speed
+        call draw_player
+
+        jmp .loop
+
+    ; ============================
+    ;   D KEY PRESSED (MOVE RIGHT)
+    ; ============================
+    .d_pressed:
+        call erase_player
+
+        add word [player_x], player_movement_speed
+        call draw_player
+
+        jmp .loop
