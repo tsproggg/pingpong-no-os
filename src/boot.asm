@@ -11,7 +11,7 @@ load_kernel:
     ; DO NOT: mov dl, 0
 
     mov ah, 0x02        ; BIOS read sectors
-    mov al, 4           ; number of sectors
+    mov al, 4           ; number of sectors to read (4 * 512 B = 2048 B)
     mov dh, 0           ; head 0
     mov ch, 0           ; cylinder 0
     mov cl, 2           ; sector 2 (sectors start at 1)

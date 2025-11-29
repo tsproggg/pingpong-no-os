@@ -9,7 +9,7 @@ BOOT_BIN="../app/boot.bin"
 KERNEL_BIN="../app/kernel.bin"
 FLOPPY_IMG="../app/floppy.img"
 
-mkdir -p ./app
+mkdir -p ../app
 
 # Clean artifacts
 rm -f "$FLOPPY_IMG" "$BOOT_BIN" "$KERNEL_BIN"
