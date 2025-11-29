@@ -35,6 +35,7 @@ draw_paddle:
         call draw_filled_rectangle
         ret
 
+
 ; ------------------------------
 ; |     SUBROUTINE: PADDLES    |
 ; ------------------------------
@@ -61,6 +62,7 @@ move_paddle_1_up:
     .done:
         ret
 
+
 ; ------------------------------
 ; |     SUBROUTINE: PADDLES    |
 ; ------------------------------
@@ -84,7 +86,8 @@ move_paddle_1_down:
     mov [paddle_1_y], ax
     .done:
         ret
-    
+
+
 ; ------------------------------
 ; |     SUBROUTINE: PADDLES    |
 ; ------------------------------
@@ -111,6 +114,7 @@ move_paddle_2_up:
     .done:
         ret
 
+
 ; ------------------------------
 ; |     SUBROUTINE: PADDLES    |
 ; ------------------------------
@@ -134,6 +138,8 @@ move_paddle_2_down:
     mov [paddle_2_y], ax
     .done:
         ret
+
+
 ; ------------------------------
 ; |     SUBROUTINE: PADDLES    |
 ; ------------------------------
@@ -162,7 +168,8 @@ update_position_up:
 
     ret
 
-; ; ------------------------------
+
+; ------------------------------
 ; |     SUBROUTINE: PADDLES    |
 ; ------------------------------
 ; Inputs: bx - X position, dx - old Y position

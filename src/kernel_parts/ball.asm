@@ -1,8 +1,8 @@
 ; ------------------    GAME: BALL    ------------------
 
-; ---------------------------------------
-; |     SUBROUTINE: GAME: BALL          |
-; ---------------------------------------
+; ----------------------------------------
+; |     SUBROUTINE: BALL UPDATE          |
+; ----------------------------------------
 ; Draw ball at current position
 ; Inputs: none
 ; Used registers: ax, bx, cx, dx, si, di
@@ -12,9 +12,9 @@ draw_ball:
     ret
 
 
-; ---------------------------------------
-; |     SUBROUTINE: GAME: BALL          |
-; ---------------------------------------
+; ----------------------------------------
+; |     SUBROUTINE: BALL UPDATE          |
+; ----------------------------------------
 ; Draw ball at current position
 ; Inputs: none
 ; Used registers: ax, bx, cx, dx, si, di
@@ -23,15 +23,15 @@ erase_ball:
     call redraw_ball
     ret
 
-; ---------------------------------------
-; |     SUBROUTINE: GAME: BALL          |
-; ---------------------------------------
+
+; ----------------------------------------
+; |     SUBROUTINE: BALL UPDATE          |
+; ----------------------------------------
 ; Draw ball at current position
 ; Inputs:
 ;    al - color
 ;    uses ball_x, ball_y, ball_radius
 ; Used registers: ax, bx, cx, dx, si, di
-
 redraw_ball:
     ; al already has color
     mov bx, [ball_x]
@@ -81,60 +81,60 @@ update_ball:
     jg .bounce_right
     jmp .check_vertical
 
-.bounce_left:
-    ; Reverse direction: cx = -cx using sub
-    mov si, cx
-    xor cx, cx
-    sub cx, si
-    ; Correct position
-    add ax, cx
-    add ax, cx  ; double correction to bounce back
-    jmp .check_vertical
+    .bounce_left:
+        ; Reverse direction: cx = -cx using sub
+        mov si, cx
+        xor cx, cx
+        sub cx, si
+        ; Correct position
+        add ax, cx
+        add ax, cx  ; double correction to bounce back
+        jmp .check_vertical
 
-.bounce_right:
-    ; Reverse direction: cx = -cx using sub
-    mov si, cx
-    xor cx, cx
-    sub cx, si
-    ; Correct position
-    add ax, cx
-    add ax, cx  ; double correction to bounce back
+    .bounce_right:
+        ; Reverse direction: cx = -cx using sub
+        mov si, cx
+        xor cx, cx
+        sub cx, si
+        ; Correct position
+        add ax, cx
+        add ax, cx  ; double correction to bounce back
 
-.check_vertical:
-    cmp bx, ball_radius
-    jl .bounce_top
+    .check_vertical:
+        cmp bx, ball_radius
+        jl .bounce_top
 
-    mov si, 480 - ball_radius
-    cmp bx, si
-    jg .bounce_bottom
-    jmp .store
+        mov si, 480 - ball_radius
+        cmp bx, si
+        jg .bounce_bottom
+        jmp .store
 
-.bounce_top:
-    ; Reverse direction: dx = -dx using sub
-    mov si, dx
-    xor dx, dx
-    sub dx, si
-    ; Correct position
-    add bx, dx
-    add bx, dx  ; double correction to bounce back
-    jmp .store
+    .bounce_top:
+        ; Reverse direction: dx = -dx using sub
+        mov si, dx
+        xor dx, dx
+        sub dx, si
+        ; Correct position
+        add bx, dx
+        add bx, dx  ; double correction to bounce back
+        jmp .store
 
-.bounce_bottom:
-    ; Reverse direction: dx = -dx using sub
-    mov si, dx
-    xor dx, dx
-    sub dx, si
-    ; Correct position
-    add bx, dx
-    add bx, dx  ; double correction to bounce back
+    .bounce_bottom:
+        ; Reverse direction: dx = -dx using sub
+        mov si, dx
+        xor dx, dx
+        sub dx, si
+        ; Correct position
+        add bx, dx
+        add bx, dx  ; double correction to bounce back
 
-.store:
-    ; save updated values
-    mov [ball_x], ax
-    mov [ball_y], bx
-    mov [ball_dx], cx
-    mov [ball_dy], dx
+    .store:
+        ; save updated values
+        mov [ball_x], ax
+        mov [ball_y], bx
+        mov [ball_dx], cx
+        mov [ball_dy], dx
 
-    ; draw new frame
-    call draw_ball
-    ret
+        ; draw new frame
+        call draw_ball
+        ret

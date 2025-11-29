@@ -30,34 +30,5 @@ _start:
 
     jmp game_loop
 
-
-    call init_random_ball_direction
-
-    ; ---------------------------------------
-    ; |  SUBROUTINE: INITIAL RANDOM DIR     |
-    ; ---------------------------------------
-    init_random_ball_direction:
-        call read_random_byte
-        test al, 1
-        jz .posx
-
-        ; Negate ball_dx using sub: ball_dx = 0 - ball_dx
-        mov ax, 0
-        sub ax, [ball_dx]
-        mov [ball_dx], ax
-
-    .posx:
-        call read_random_byte
-        test al, 1
-        jz .posy
-
-        ; Negate ball_dy using sub: ball_dy = 0 - ball_dy
-        mov ax, 0
-        sub ax, [ball_dy]
-        mov [ball_dy], ax
-
-    .posy:
-        ret
-
     hlt
 
