@@ -50,7 +50,7 @@ read_character_blocking:
 ; Output: ZF - zero flag (0 = keystroke available, 1 = buffer is empty)
 ; Used registers: ax
 read_key_status:
-    mov ah, 0x01
+    mov ah, 0x11
     int 0x16
     ret
 

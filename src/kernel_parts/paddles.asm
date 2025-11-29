@@ -1,3 +1,5 @@
+; --------------------    PADDLES    --------------------
+
 ; -----------------------------------
 ; |      SUBROUTINE: PADDLES        |
 ; -----------------------------------
@@ -166,7 +168,7 @@ update_position_up:
 ; Inputs: bx - X position, dx - old Y position
 ; Used registers: ax, bx, cx, dx, si, di
 update_position_down:
-    mov al, 0x00       ; color black
+    mov al, BLACK_COLOR       ; color black
     mov cx, bx
     add cx, paddle_width     ; x1
     mov si, dx                 ; y1
@@ -178,7 +180,7 @@ update_position_down:
     pop dx
     pop bx
 
-    mov al, 0x0F        ; color white
+    mov al, WHITE_COLOR        ; color white
     mov cx, bx
     add cx, paddle_width      ; x1
     add dx, paddle_height     ; y0
