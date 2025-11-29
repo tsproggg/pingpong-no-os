@@ -5,14 +5,48 @@
 ; ---------------------------------
 ; Inputs: none
 ; Used registers: ax
+define_field_frame_inner_borders:
+    mov word [field_frame_size_x], screen_size_x
+    sub word [field_frame_size_x], field_frame_margin_x
+    sub word [field_frame_size_x], field_frame_border_width
+    sub word [field_frame_size_x], field_frame_margin_x
+    sub word [field_frame_size_x], field_frame_border_width ; field_frame_size_x
+
+    mov word [field_frame_size_y], screen_size_y
+    sub word [field_frame_size_y], field_frame_margin_top
+    sub word [field_frame_size_y], field_frame_border_width
+    sub word [field_frame_size_y], field_frame_margin_bottom
+    sub word [field_frame_size_y], field_frame_border_width ; field_frame_size_y
+
+    mov word [field_frame_top], field_frame_margin_top
+    add word [field_frame_top], field_frame_border_width    ; field_frame_top
+
+    mov word [field_frame_bottom], screen_size_y
+    sub word [field_frame_bottom], field_frame_margin_bottom
+    sub word [field_frame_bottom], field_frame_border_width ; field_frame_bottom
+
+    mov word [field_frame_left], field_frame_margin_x
+    add word [field_frame_left], field_frame_border_width   ; field_frame_left
+
+    mov word [field_frame_right], screen_size_x
+    sub word [field_frame_right], field_frame_margin_x
+    sub word [field_frame_right], field_frame_border_width  ; field_frame_right
+
+    ret
+
+; ---------------------------------
+; |     SUBROUTINE: INIT          |
+; ---------------------------------
+; Inputs: none
+; Used registers: ax
 define_paddles_starting_coords:
-    mov word [paddle_1_x], field_frame_margin_left
-    add word [paddle_1_x], field_frame_border_width  ; paddle_1_x
+    mov ax, [field_frame_left]
+    mov [paddle_1_x], ax        ; paddle_1_x
 
-    mov word [paddle_1_y], field_frame_margin_top
-    add word [paddle_1_y], field_frame_border_width
+    mov ax, [field_frame_top]
+    mov [paddle_1_y], ax
 
-    mov ax, field_frame_size_y
+    mov ax, [field_frame_size_y]
     shr ax, 1   ; ax = field_frame_size_y / 2
     add word [paddle_1_y], ax
 
@@ -36,19 +70,21 @@ define_paddles_starting_coords:
 ; Inputs: none
 ; Used registers: ax
 define_ball_starting_coords:
-    mov ax, field_frame_size_x
+    mov ax, [field_frame_left]
+    mov [ball_x], ax
+
+    mov ax, [field_frame_size_x]
     shr ax, 1   ; ax = field_frame_size_x / 2
 
-    mov word [ball_x], field_frame_margin_left
-    add word [ball_x], field_frame_border_width
     add [ball_x], ax
     sub word [ball_x], ball_radius       ; ball_x
 
-    mov ax, field_frame_size_y
+    mov ax, [field_frame_top]
+    mov [ball_x], ax
+
+    mov ax, [field_frame_size_y]
     shr ax, 1   ; ax = field_frame_size_y / 2
 
-    mov word [ball_y], field_frame_margin_top
-    add word [ball_y], field_frame_border_width
     add word [ball_y], ax
     sub word [ball_y], ball_radius       ; ball_y
 

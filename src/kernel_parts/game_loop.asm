@@ -8,6 +8,7 @@
 game_loop:
     .init:
         ; field
+        call define_field_frame_inner_borders
         call draw_field_frame
 
         ; paddles

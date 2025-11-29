@@ -1,7 +1,4 @@
 section .data
-    ; ---- debug  ----
-    success_msg db "Kernel successfully loaded", 13, 10, 0
-
     ; ---- functions ----
     number_to_string_f_buff db 0,0,0,0,0,0
 
@@ -17,12 +14,19 @@ section .data
     ; field frame
     field_frame_border_width equ 2
     field_frame_margin_top equ 48   ; 5px margin + 38px text + 5px margin
-    field_frame_margin_left equ 18
-    field_frame_size_x equ 600
-    field_frame_size_y equ 420
+    field_frame_margin_x equ 18
+    field_frame_margin_bottom equ 8
+
+    field_frame_size_x dw 0     ; 600
+    field_frame_size_y dw 0     ; 420
+
+    field_frame_top dw 0        ; inner coordinate (bottom of the border)
+    field_frame_left dw 0       ; inner coordinate (right of the border)
+    field_frame_bottom dw 0     ; inner coordinate (top of the border)
+    field_frame_right dw 0      ; inner coordinate (left of the border)
 
     ; ball
-    ball_radius equ 4      ; Ball radius
+    ball_radius equ 4    ; Ball radius
     ball_x dw 0          ; Ball center x coord
     ball_y dw 0          ; Ball center y coord
 

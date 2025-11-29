@@ -179,30 +179,26 @@ draw_field_frame:
     ; --- TOP BORDER ---
     mov al, WHITE_COLOR
 
-    mov bx, field_frame_margin_left     ; x0
+    mov bx, field_frame_margin_x        ; x0
 
     mov cx, screen_size_x
     sub cx, bx                          ; x1
 
-    mov si, field_frame_margin_top
-    add si, field_frame_border_width    ; y1
+    mov si, [field_frame_top]           ; y1
 
     mov dx, si
     sub dx, field_frame_border_width    ; y0
-
     call draw_filled_rectangle
 
     ; --- BOTTOM BORDER ---
     mov al, WHITE_COLOR
 
-    mov bx, field_frame_margin_left     ; x0
+    mov bx, field_frame_margin_x        ; x0
 
     mov cx, screen_size_x
     sub cx, bx                          ; x1
 
-    mov dx, field_frame_margin_top
-    add dx, field_frame_border_width
-    add dx, field_frame_size_y          ; y0
+    mov dx, [field_frame_bottom]        ; y0
 
     mov si, dx
     add si, field_frame_border_width    ; y1
@@ -211,31 +207,25 @@ draw_field_frame:
     ; --- LEFT BORDER ---
     mov al, WHITE_COLOR
 
-    mov bx, field_frame_margin_left     ; x0
+    mov bx, field_frame_margin_x        ; x0
 
-    mov cx, bx
-    add cx, field_frame_border_width    ; x1
+    mov cx, [field_frame_left]          ; x1
 
-    mov dx, field_frame_margin_top      ; y0
+    mov dx, [field_frame_top]    ; y0
 
-    mov si, dx
-    add si, field_frame_border_width
-    add si, field_frame_size_y
+    mov si, [field_frame_bottom]
     add si, field_frame_border_width    ; y1
     call draw_filled_rectangle
 
     ; --- RIGHT BORDER ---
     mov cx, screen_size_x
-    sub cx, field_frame_margin_left     ; x1
+    sub cx, field_frame_margin_x        ; x1
 
-    mov bx, cx
-    sub bx, field_frame_border_width    ; x0
+    mov bx, [field_frame_right]         ; x0
 
     mov dx, field_frame_margin_top      ; y0
 
-    mov si, dx
-    add si, field_frame_border_width
-    add si, field_frame_size_y
+    mov si, [field_frame_bottom]
     add si, field_frame_border_width    ; y1
     call draw_filled_rectangle
 
