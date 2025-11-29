@@ -59,16 +59,19 @@ read_key_status:
 ; |     SUBROUTINE: KEYBOARD         |
 ; -------------------------------------
 ; Inputs: none
-; Output: al - scan code of the pressed key
+; Output: ax - scan code of the pressed key
 read_keyboard:
+    xor ax, ax
     call read_character_non_blocking
     cmp al, 119
     je .w_pressed
     cmp al, 115
     je .s_pressed
-    cmp al, 48h
+    cmp al, 0 ; check for extended key
+    jne .done
+    cmp ah, 0x48
     je .uparrow_pressed
-    cmp al, 50h
+    cmp ah, 0x50
     je .downarrow_pressed
 
     jmp .done
