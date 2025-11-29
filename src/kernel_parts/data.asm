@@ -2,7 +2,7 @@ section .data
     ; ---- functions ----
     number_to_string_f_buff db 0,0,0,0,0,0
 
-    ; colors
+    ; ---- colors ----
     BLACK_COLOR equ 0x00
     WHITE_COLOR equ 0x0F
 
@@ -17,8 +17,8 @@ section .data
     field_frame_margin_x equ 18
     field_frame_margin_bottom equ 8
 
-    field_frame_size_x dw 0     ; 600
-    field_frame_size_y dw 0     ; 420
+    field_frame_size_x dw 0
+    field_frame_size_y dw 0
 
     field_frame_top dw 0        ; inner coordinate (bottom of the border)
     field_frame_left dw 0       ; inner coordinate (right of the border)
@@ -30,13 +30,13 @@ section .data
     ball_x dw 0          ; Ball center x coord
     ball_y dw 0          ; Ball center y coord
 
-    ; ---- ball movement ----
+    ; ball movement
     ball_dx dw 1        ; horizontal speed (+right, -left)
     ball_dy dw 1        ; vertical speed (+down, -up)
 
-    ; Ball update rate control
-    ball_frame_counter db 0
+    ; ball update rate control
     ball_update_rate equ 90    ; Update ball for written frames
+    ball_frame_counter db 0
 
     ; paddles
     paddle_width equ 8
@@ -48,3 +48,7 @@ section .data
 
     paddle_2_x dw 0
     paddle_2_y dw 0     ; left top corner
+
+    ; score
+    game_score_left dw 0
+    game_score_right dw 0

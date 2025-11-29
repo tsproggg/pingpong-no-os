@@ -56,6 +56,9 @@ redraw_ball:
 ; Moves ball and handles bouncing
 ; Uses: ax, bx, cx, dx, si, di
 update_ball:
+    push bp
+    mov bp, sp
+
     ; erase previous frame
     call erase_ball
 
@@ -71,15 +74,66 @@ update_ball:
     add ax, cx
     add bx, dx
 
-    ; ---- screen boundaries ----
-    ; horizontal bounce
-    cmp ax, ball_radius
-    jl .bounce_left
+    ; ---- paddle collisions ----
+    ; left paddle
+    push ax
+    push bx
+    mov dx, 1
+    call check_paddle_ball_collision
 
-    mov si, 640 - ball_radius
-    cmp ax, si
-    jg .bounce_right
-    jmp .check_vertical
+    test ax, ax
+    jne .bounce_right   ; ball collided to the left paddle
+
+    ; right paddle
+    mov ax, [bp-2]
+    mov bx, [bp-4]
+    mov dx, 2
+    call check_paddle_ball_collision
+
+    test ax, ax
+    jne .bounce_left    ; ball collided to the right paddle
+
+    ; ---- field collisions ----
+    ; left
+    mov ax, [bp-2]
+    sub ax, ball_radius         ; left end of the ball
+
+    cmp ax, [field_frame_left]
+    jle .goal_left
+
+    ; right
+    add ax, ball_radius
+    add ax, ball_radius         ; right end of the ball
+
+    cmp ax, [field_frame_right]
+    jge .goal_right
+
+    .check_vertical:
+        ; field top
+        mov bx, [bp-4]
+        sub bx, ball_radius     ; highest end of the ball
+
+        cmp bx, [field_frame_top]
+        jle .bounce_top
+
+        ; field bottom
+        add bx, ball_radius
+        add bx, ball_radius     ; lowest end of the ball
+
+        cmp bx, [field_frame_bottom]
+        jge .bounce_bottom
+
+        jmp .store
+
+    .goal_left:
+        ; TODO: add some visual notification about the goal
+        inc word [game_score_right]
+        jmp .bounce_right
+
+    .goal_right:
+        ; TODO: add some visual notification about the goal
+        inc word [game_score_left]
+        jmp .bounce_left
 
     .bounce_left:
         ; Reverse direction: cx = -cx using sub
@@ -89,6 +143,7 @@ update_ball:
         ; Correct position
         add ax, cx
         add ax, cx  ; double correction to bounce back
+
         jmp .check_vertical
 
     .bounce_right:
@@ -100,14 +155,7 @@ update_ball:
         add ax, cx
         add ax, cx  ; double correction to bounce back
 
-    .check_vertical:
-        cmp bx, ball_radius
-        jl .bounce_top
-
-        mov si, 480 - ball_radius
-        cmp bx, si
-        jg .bounce_bottom
-        jmp .store
+        jmp .check_vertical
 
     .bounce_top:
         ; Reverse direction: dx = -dx using sub
@@ -137,4 +185,72 @@ update_ball:
 
         ; draw new frame
         call draw_ball
+
+        mov sp, bp
+        pop bp
+        ret
+
+
+; ---------------------------------------
+; |     SUBROUTINE: BALL UPDATE         |
+; ---------------------------------------
+; Inputs:
+;   ax - new X ball position
+;   bx - new Y ball position
+;   dx - paddle number (1 or 2)
+; Outputs: ax - true/false (0x01 or 0x00)
+; Used registers: cx, si
+check_paddle_ball_collision:
+    .check_paddle_number:
+        cmp dx, 1
+        je .load_1
+
+        cmp dx, 2
+        je .load_2
+
+        jmp .no_collision
+
+    .load_1:
+        mov cx, [paddle_1_x]
+        mov si, [paddle_1_y]
+        jmp .check_by_x_1
+
+    .load_2:
+        mov cx, [paddle_2_x]
+        mov si, [paddle_2_y]
+        jmp .check_by_x_2
+
+    .check_by_x_1:
+        add cx, paddle_width
+
+        sub ax, ball_radius
+        cmp ax, cx
+        jg .no_collision
+
+        jmp .check_by_y
+
+    .check_by_x_2:
+        add ax, ball_radius
+        cmp ax, cx
+        jg .no_collision
+
+    .check_by_y:
+        add bx, ball_radius     ; lowest end of the ball
+
+        cmp bx, si
+        jl .no_collision
+
+        add si, paddle_height   ; bottom of the paddle
+        add bx, ball_radius
+        add bx, ball_radius     ; highest end of the ball
+
+        cmp bx, si
+        jg .no_collision
+
+        ; there is a collision
+        mov ax, 1
+        ret
+
+    .no_collision:
+        xor ax, ax
         ret
