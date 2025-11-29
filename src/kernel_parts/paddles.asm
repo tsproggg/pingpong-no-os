@@ -11,28 +11,39 @@ draw_paddle:
     je .draw_paddle_1
     cmp bl, 2
     je .draw_paddle_2
-    ret                     ; Invalid paddle number, exit
+
+    jmp .done                     ; Invalid paddle number, exit
 
     .draw_paddle_1:
         ; Load paddle 1 position
         mov bx, [paddle_1_x]       ; x0
-        mov cx, [paddle_1_x]
-        add cx, paddle_width      ; x1
-        mov dx, [paddle_1_y]       ; y0
-        mov si, [paddle_1_y]
-        add si, paddle_height     ; y1
 
+        mov cx, [paddle_1_x]
+        add cx, paddle_width       ; x1
+
+        mov dx, [paddle_1_y]       ; y0
+
+        mov si, [paddle_1_y]
+        add si, paddle_height      ; y1
         call draw_filled_rectangle
-        ret
+
+        jmp .done
+
     .draw_paddle_2:
         mov bx, [paddle_2_x]       ; x0
-        mov cx, [paddle_2_x]
-        add cx, paddle_width      ; x1
-        mov dx, [paddle_2_y]       ; y0
-        mov si, [paddle_2_y]
-        add si, paddle_height     ; y1
 
+        mov cx, [paddle_2_x]
+        add cx, paddle_width       ; x1
+
+        mov dx, [paddle_2_y]       ; y0
+
+        mov si, [paddle_2_y]
+        add si, paddle_height      ; y1
         call draw_filled_rectangle
+
+        jmp .done
+
+    .done:
         ret
 
 
@@ -42,22 +53,28 @@ draw_paddle:
 ; Inputs: None
 ; Used registers: ax, bx, cx, dx, si, di
 move_paddle_1_up:
-    mov ax, [paddle_1_y]
-
     .check_bounds:
-        cmp ax, paddle_speed 
-        jb .done
-    
+        mov ax, [paddle_1_y]
+        sub ax, paddle_speed
+        cmp ax, [field_frame_top]
+        jg .redraw
 
-    mov bx, [paddle_1_x]
-    mov dx, [paddle_1_y]
+        ; clamping new position
+        mov ax, [field_frame_top]
+        inc ax                 ; to make the highest pixel of the paddle below the frame
 
-    call update_position_up
+        add ax, paddle_speed   ; to feed update_position_up a value where it can subtract paddle_speed
+        mov [paddle_1_y], ax
 
-    mov ax, [paddle_1_y]
-    sub ax, paddle_speed
+    .redraw:
+        mov bx, [paddle_1_x]
+        mov dx, [paddle_1_y]
 
-    mov [paddle_1_y], ax
+        call update_position_up
+
+        mov ax, [paddle_1_y]
+        sub ax, paddle_speed
+        mov [paddle_1_y], ax
 
     .done:
         ret
@@ -69,21 +86,31 @@ move_paddle_1_up:
 ; Inputs: None
 ; Used registers: ax, bx, cx, dx, si, di
 move_paddle_1_down:
-    mov ax, [paddle_1_y]
-    add ax, paddle_speed
-
-    .check_bounds_down:
-        mov cx, 480
+    .check_bounds:
+        mov ax, [paddle_1_y]
         add ax, paddle_height
-        cmp ax, cx
-        jg .done
-    
-    mov bx, [paddle_1_x]
-    mov dx, [paddle_1_y]
-    call update_position_down
-    mov ax, [paddle_1_y]
-    add ax, paddle_speed
-    mov [paddle_1_y], ax
+        add ax, paddle_speed
+
+        cmp ax, [field_frame_bottom]
+        jl .redraw
+
+        ; clamping
+        mov ax, [field_frame_bottom]
+        dec ax                  ; to make the lowest pixel of the paddle above the frame
+        sub ax, paddle_height
+        sub ax, paddle_speed    ; to feed update_position_down a value where it can add paddle_speed
+        mov [paddle_1_y], ax
+
+    .redraw:
+        mov bx, [paddle_1_x]
+        mov dx, [paddle_1_y]
+
+        call update_position_down
+
+        mov ax, [paddle_1_y]
+        add ax, paddle_speed
+        mov [paddle_1_y], ax
+
     .done:
         ret
 
@@ -94,22 +121,29 @@ move_paddle_1_down:
 ; Inputs: None
 ; Used registers: ax, bx, cx, dx, si, di
 move_paddle_2_up:
-    mov ax, [paddle_2_y]
+   .check_bounds:
+        mov ax, [paddle_2_y]
+        sub ax, paddle_speed
+        cmp ax, [field_frame_top]
+        jg .redraw
 
-    .check_bounds:
-        cmp ax, paddle_speed 
-        jb .done
-    
+        ; clamping new position
+        mov ax, [field_frame_top]
+        inc ax                 ; to make the highest pixel of the paddle below the frame
 
-    mov bx, [paddle_2_x]
-    mov dx, [paddle_2_y]
+        add ax, paddle_speed   ; to feed update_position_up a value where it can subtract paddle_speed
+        mov [paddle_2_y], ax
 
-    call update_position_up
+   .redraw:
+        mov bx, [paddle_2_x]
+        mov dx, [paddle_2_y]
 
-    mov ax, [paddle_2_y]
-    sub ax, paddle_speed
+        call update_position_up
 
-    mov [paddle_2_y], ax
+        mov ax, [paddle_2_y]
+        sub ax, paddle_speed
+
+        mov [paddle_2_y], ax
 
     .done:
         ret
@@ -121,21 +155,31 @@ move_paddle_2_up:
 ; Inputs: None
 ; Used registers: ax, bx, cx, dx, si, di
 move_paddle_2_down:
-    mov ax, [paddle_2_y]
-    add ax, paddle_speed
-
-    .check_bounds_down:
-        mov cx, 480
+    .check_bounds:
+        mov ax, [paddle_2_y]
         add ax, paddle_height
-        cmp ax, cx
-        jg .done
-    
-    mov bx, [paddle_2_x]
-    mov dx, [paddle_2_y]
-    call update_position_down
-    mov ax, [paddle_2_y]
-    add ax, paddle_speed
-    mov [paddle_2_y], ax
+        add ax, paddle_speed
+
+        cmp ax, [field_frame_bottom]
+        jl .redraw
+
+        ; clamping
+        mov ax, [field_frame_bottom]
+        dec ax                  ; to make the lowest pixel of the paddle above the frame
+        sub ax, paddle_height
+        sub ax, paddle_speed    ; to feed update_position_down a value where it can add paddle_speed
+        mov [paddle_2_y], ax
+
+    .redraw:
+        mov bx, [paddle_2_x]
+        mov dx, [paddle_2_y]
+
+        call update_position_down
+
+        mov ax, [paddle_2_y]
+        add ax, paddle_speed
+        mov [paddle_2_y], ax
+
     .done:
         ret
 
@@ -146,25 +190,33 @@ move_paddle_2_down:
 ; Inputs: bx - X position, dx - old Y position  
 ; Used registers: ax, bx, cx, dx, si, di
 update_position_up:
-    mov al, 0x0F       ; color white
+    mov al, WHITE_COLOR      ; color white
+
     mov cx, bx
     add cx, paddle_width     ; x1
-    mov si, dx                 ; y1
+
+    mov si, dx               ; y1
     sub dx, paddle_speed     ; y0
 
+    ; save x0 and old y0
     push bx
     push dx
-    call draw_filled_rectangle;
+
+    call draw_filled_rectangle
+
+    ; restore x0 and old y0
     pop dx
     pop bx
 
-    mov al, 0x00        ; color black
+    mov al, BLACK_COLOR              ; color black
+
     mov cx, bx
     add cx, paddle_width      ; x1
-    add dx, paddle_height     ; y1
+
+    add dx, paddle_height
     mov si, dx
-    add si, paddle_speed
-    call draw_filled_rectangle;
+    add si, paddle_speed      ; y1
+    call draw_filled_rectangle
 
     ret
 
@@ -176,23 +228,32 @@ update_position_up:
 ; Used registers: ax, bx, cx, dx, si, di
 update_position_down:
     mov al, BLACK_COLOR       ; color black
-    mov cx, bx
-    add cx, paddle_width     ; x1
-    mov si, dx                 ; y1
-    add si, paddle_speed     ; y0
 
+    mov cx, bx
+    add cx, paddle_width      ; x1
+
+    mov si, dx
+    add si, paddle_speed      ; y1
+
+    ; save x0 and old y0
     push bx
     push dx
-    call draw_filled_rectangle;
+
+    call draw_filled_rectangle
+
+    ; restore x0 and old y0
     pop dx
     pop bx
 
-    mov al, WHITE_COLOR        ; color white
+    mov al, WHITE_COLOR       ; color white
+
     mov cx, bx
     add cx, paddle_width      ; x1
+
     add dx, paddle_height     ; y0
+
     mov si, dx
-    add si, paddle_speed     ; y1
-    call draw_filled_rectangle;
+    add si, paddle_speed      ; y1
+    call draw_filled_rectangle
 
     ret
