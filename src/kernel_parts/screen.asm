@@ -41,25 +41,6 @@ print_string_graphics:
         ret
 
 
-; -----------------------------
-; |     SUBROUTINE: SCREEN    |
-; -----------------------------
-print_string:
-    .next_char:
-        mov al, [si]
-        cmp al, 0
-        je .done
-        mov ah, 0x0E  ; BIOS interrupt teletype output
-        mov bh, 0x00  ; page number (usually 0)
-        mov bl, 0x00  ; BL = foreground color (optional, often ignored by QEMU's simple VGA)
-        int 0x10 ; Call the BIOS video interrupt
-        inc si
-        jmp .next_char
-
-        .done:
-        ret
-
-
 ; -----------------------------------
 ; |     SUBROUTINE: SCREEN          |
 ; -----------------------------------
@@ -115,47 +96,57 @@ plot_pixel:
 ; -----------------------------
 ; |     SUBROUTINE: SCREEN    |
 ; -----------------------------
-; Inputs: bx = x0, cx = x1, dx = y0, si = y1,
+; Inputs:
+;   al = color
+;   bx = x0
+;   cx = x1
+;   dx = y0
+;   si = y1
 ; Used registers: ax, bx, cx, dx, si, di
-
 draw_filled_rectangle:
+    push bp
+    mov bp, sp
+
     ; Save ALL parameters to memory
-    mov [draw_filled_rectangle_f_color], al
-    mov [rectangle_x0], bx
-    mov [rectangle_x1], cx
-    mov [rectangle_y0], dx
-    mov [rectangle_y1], si
+    push ax     ; color
+    push bx     ; x0
+    push cx     ; x1
+    push dx     ; y0
+    push si     ; y1
 
     ; Validate bounds
-    cmp cx, bx      ; if x1 < x0, exit
-    jb .done
-    cmp si, dx      ; if y1 < y0, exit
-    jb .done
+    cmp cx, bx      ; if x1 <= x0, exit
+    jbe .done
+    cmp si, dx      ; if y1 <= y0, exit
+    jbe .done
 
     mov ah, 0x0C    ; BIOS write pixel function
     mov bh, 0       ; Page 0
 
-    mov di, [rectangle_y0]  ; DI = current y (start at y0)
+    mov di, [bp-8]  ; DI = current y (start at y0)
 
     .y_loop:
-        mov cx, [rectangle_x0]  ; CX = current x (RELOAD from memory each row!)
+        mov cx, [bp-4]  ; CX = current x (RELOAD from memory each row!)
 
     .x_loop:
-        mov al, [draw_filled_rectangle_f_color]
+        mov al, [bp-2]
         mov dx, di      ; DX = current y
         ; CX already has current x
         int 0x10
 
         inc cx
-        cmp cx, [rectangle_x1]
+        cmp cx, [bp-6]
         jbe .x_loop     ; unsigned comparison
 
         inc di
-        cmp di, [rectangle_y1]
+        cmp di, [bp-10]
         jbe .y_loop     ; unsigned comparison
 
     .done:
+        mov sp, bp
+        pop bp
         ret
+
 
 ; --------------------    SCREEN    --------------------
 

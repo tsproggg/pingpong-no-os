@@ -11,7 +11,7 @@ print_on_key_press:
 
     cmp al, bl
     jne .nothing_pressed
-    call print_string
+    call print_string_graphics
 
     .nothing_pressed:
         ret
@@ -79,10 +79,10 @@ read_keyboard:
     .s_pressed:
         call move_paddle_1_down
         jmp .done
-    .uparrow_pressed
+    .uparrow_pressed:
         call move_paddle_2_up
         jmp .done
-    .downarrow_pressed
+    .downarrow_pressed:
         call move_paddle_2_down
         jmp .done
 
