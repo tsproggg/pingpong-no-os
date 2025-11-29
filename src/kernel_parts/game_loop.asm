@@ -17,7 +17,16 @@ game_loop:
         call draw_ball
 
     .loop:
+        call wait_vsync         ; Wait for vertical sync (limits to ~60 FPS)
         call read_keyboard
 
-        jmp .loop
+        ; Frame counter for ball updates
+        inc byte [ball_frame_counter]
+        cmp byte [ball_frame_counter], ball_update_rate
+        jl .skip_ball_update
 
+        mov byte [ball_frame_counter], 0
+        call update_ball
+
+    .skip_ball_update:
+        jmp .loop
