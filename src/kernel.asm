@@ -6,11 +6,6 @@ section .data
     success_msg db "Kernel successfully loaded", 13, 10, 0
 
     number_to_string_f_buff db 0,0,0,0,0,0
-    draw_filled_rectangle_f_color db 0
-    rectangle_x0: dw 0
-    rectangle_y0: dw 0
-    rectangle_x1: dw 0
-    rectangle_y1: dw 0
 
     ball_x: dw 320          ; Ball starting x position (center of screen)
     ball_y: dw 240          ; Ball starting y position (center of screen)
@@ -18,6 +13,7 @@ section .data
 
     player_x: dw 14
     player_y: dw 50
+
 
 section .text
     global _start
@@ -52,12 +48,12 @@ _start:
     mov si, success_msg
     call print_string_graphics
 
+
 ; -----------------------------------
 ; |     SUBROUTINE: DEMO_LOOP       |
 ; -----------------------------------
 ; Inputs: none
-; Used registers: all
-
+; Used registers: ax, bx, cx, dx, si, di
 .demo_loop:
     .loop:
         ; ----- Draw player normally -----
@@ -179,6 +175,7 @@ print_string_graphics:
         mov al, [si]
         cmp al, 0
         je .done
+
         int 0x10
         inc si
         jmp .next_char
@@ -242,49 +239,56 @@ plot_pixel:
 ; -----------------------------
 ; |     SUBROUTINE: SCREEN    |
 ; -----------------------------
-; Inputs: bx = x0, cx = x1, dx = y0, si = y1,
+; Inputs:
+;   al = color
+;   bx = x0
+;   cx = x1
+;   dx = y0
+;   si = y1
 ; Used registers: ax, bx, cx, dx, si, di
-
 draw_filled_rectangle:
+    push bp
+    mov bp, sp
+
     ; Save ALL parameters to memory
-    mov [draw_filled_rectangle_f_color], al
-    mov [rectangle_x0], bx
-    mov [rectangle_x1], cx
-    mov [rectangle_y0], dx
-    mov [rectangle_y1], si
+    push ax     ; color
+    push bx     ; x0
+    push cx     ; x1
+    push dx     ; y0
+    push si     ; y1
 
     ; Validate bounds
-    cmp cx, bx      ; if x1 < x0, exit
-    jb .done
-    cmp si, dx      ; if y1 < y0, exit
-    jb .done
+    cmp cx, bx      ; if x1 <= x0, exit
+    jbe .done
+    cmp si, dx      ; if y1 <= y0, exit
+    jbe .done
 
     mov ah, 0x0C    ; BIOS write pixel function
     mov bh, 0       ; Page 0
 
-    mov di, [rectangle_y0]  ; DI = current y (start at y0)
+    mov di, [bp-8]  ; DI = current y (start at y0)
 
     .y_loop:
-        mov cx, [rectangle_x0]  ; CX = current x (RELOAD from memory each row!)
+        mov cx, [bp-4]  ; CX = current x (RELOAD from memory each row!)
 
     .x_loop:
-        mov al, [draw_filled_rectangle_f_color]
+        mov al, [bp-2]
         mov dx, di      ; DX = current y
         ; CX already has current x
         int 0x10
 
         inc cx
-        cmp cx, [rectangle_x1]
+        cmp cx, [bp-6]
         jbe .x_loop     ; unsigned comparison
 
         inc di
-        cmp di, [rectangle_y1]
+        cmp di, [bp-10]
         jbe .y_loop     ; unsigned comparison
 
     .done:
+        mov sp, bp
+        pop bp
         ret
-
-
 
 
 ; -----------------------------------
@@ -321,7 +325,6 @@ erase_ball:
     add si, [ball_size]     ; y1 = y0 + size
     call draw_filled_rectangle
     ret
-
 
 
 ; --------------------    KEYBOARD    --------------------
@@ -382,6 +385,7 @@ read_key_status:
 
 
 ; --------------------    SYSTEM    --------------------
+
 ; -----------------------------------
 ; |     SUBROUTINE: SYSTEM          |
 ; -----------------------------------
