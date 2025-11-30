@@ -31,18 +31,11 @@ game_loop:
         call print_string_graphics
 
     .loop:
-        ; call wait_vsync         ; Wait for vertical sync (limits to ~60 FPS)
-        hlt                     ; Wait for next interrupt
+        hlt
+        cmp byte [timer_counter], 1  ; one tick = 1/60 second
+        jb .loop
+
         call move_paddles
-
-        ; Frame counter for ball updates
-        inc byte [ball_frame_counter]
-        cmp byte [ball_frame_counter], ball_update_rate
-        jl .skip_ball_update
-
-        mov byte [ball_frame_counter], 0
         call update_ball
-        
 
-    .skip_ball_update:
         jmp .loop
