@@ -1,7 +1,7 @@
 set -ex
 
 # --- Define Variables ---
-FLOPPY_IMG="/app/floppy.img"
+FLOPPY_IMG="./app/floppy.img"
 
 if [ ! -f "$FLOPPY_IMG" ]; then
     echo "Error: Floppy image $FLOPPY_IMG not found. Run ./build.sh first."

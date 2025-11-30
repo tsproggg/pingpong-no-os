@@ -1,13 +1,15 @@
 set -ex
 
-cd /app/src || exit 2
+cd ./src || exit 2
 
 # --- Define Variables ---
 BOOT_ASM="boot.asm"
 KERNEL_ASM="kernel.asm"
-BOOT_BIN="/app/boot.bin"
-KERNEL_BIN="/app/kernel.bin"
-FLOPPY_IMG="/app/floppy.img"
+BOOT_BIN="../app/boot.bin"
+KERNEL_BIN="../app/kernel.bin"
+FLOPPY_IMG="../app/floppy.img"
+
+mkdir -p ../app
 
 # Clean artifacts
 rm -f "$FLOPPY_IMG" "$BOOT_BIN" "$KERNEL_BIN"
