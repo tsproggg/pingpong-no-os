@@ -27,9 +27,13 @@ game_loop:
 
         call draw_ball
 
+        mov si, [kernel_read_message]
+        call print_string_graphics
+
     .loop:
-        call wait_vsync         ; Wait for vertical sync (limits to ~60 FPS)
-        call read_keyboard
+        ; call wait_vsync         ; Wait for vertical sync (limits to ~60 FPS)
+        hlt                     ; Wait for next interrupt
+        call move_paddles
 
         ; Frame counter for ball updates
         inc byte [ball_frame_counter]
@@ -38,6 +42,7 @@ game_loop:
 
         mov byte [ball_frame_counter], 0
         call update_ball
+        
 
     .skip_ball_update:
         jmp .loop

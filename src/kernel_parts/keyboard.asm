@@ -60,33 +60,88 @@ read_key_status:
 ; -------------------------------------
 ; Inputs: none
 ; Output: ax - scan code of the pressed key
+; read_keyboard:
+;     xor ax, ax
+;     call read_character_non_blocking
+;     cmp al, 119
+;     je .w_pressed
+;     cmp al, 115
+;     je .s_pressed
+;     cmp al, 0 ; check for extended key
+;     jne .done
+;     cmp ah, 0x48
+;     je .uparrow_pressed
+;     cmp ah, 0x50
+;     je .downarrow_pressed
+
+;     jmp .done
+
+;     .w_pressed:
+;         call move_paddle_1_up
+;         jmp .done
+;     .s_pressed:
+;         call move_paddle_1_down
+;         jmp .done
+;     .uparrow_pressed:
+;         call move_paddle_2_up
+;         jmp .done
+;     .downarrow_pressed:
+;         call move_paddle_2_down
+;         jmp .done
+
+;     .done:
+;         ret
+
 read_keyboard:
-    xor ax, ax
-    call read_character_non_blocking
-    cmp al, 119
+    cmp al, 0x11  ; 'W' key make code
     je .w_pressed
-    cmp al, 115
+
+    cmp al, 0x91  ; 'W' key break code
+    je .w_released
+
+    cmp al, 0x1F  ; 'S' key make code
     je .s_pressed
-    cmp al, 0 ; check for extended key
-    jne .done
-    cmp ah, 0x48
+
+    cmp al, 0x9F  ; 'S' key break code
+    je .s_released
+
+    cmp al, 0x12  ; Up Arrow make code
     je .uparrow_pressed
-    cmp ah, 0x50
+
+    cmp al, 0x92  ; Up Arrow break code
+    je .uparrow_released
+
+    cmp al, 0x20  ; Down Arrow make code
     je .downarrow_pressed
+
+    cmp al, 0xA0  ; Down Arrow break code
+    je .downarrow_released
 
     jmp .done
 
     .w_pressed:
-        call move_paddle_1_up
+        mov byte [key_w_pressed], 1
+        jmp .done
+    .w_released:
+        mov byte [key_w_pressed], 0
         jmp .done
     .s_pressed:
-        call move_paddle_1_down
+        mov byte [key_s_pressed], 1
+        jmp .done
+    .s_released:
+        mov byte [key_s_pressed], 0
         jmp .done
     .uparrow_pressed:
-        call move_paddle_2_up
+        mov byte [key_uparrow_pressed], 1
+        jmp .done
+    .uparrow_released:
+        mov byte [key_uparrow_pressed], 0
         jmp .done
     .downarrow_pressed:
-        call move_paddle_2_down
+        mov byte [key_downarrow_pressed], 1
+        jmp .done
+    .downarrow_released:
+        mov byte [key_downarrow_pressed], 0
         jmp .done
 
     .done:

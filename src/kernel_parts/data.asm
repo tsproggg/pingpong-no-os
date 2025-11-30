@@ -48,3 +48,16 @@ section .data
 
     paddle_2_x dw 0
     paddle_2_y dw 0     ; left top corner
+
+    ;pressed keys
+
+    key_w_pressed db 0
+    key_s_pressed db 0
+    key_uparrow_pressed db 0
+    key_downarrow_pressed db 0
+
+    keys_table times 128 db 0
+
+    kernel_read_message db "Kernel Loaded Successfully!", 0
+
+    timer_counter db 0
