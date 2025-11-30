@@ -1,3 +1,8 @@
+; --------------------------------
+; |   Kernel Interrupt Handling  |
+; --------------------------------
+; Input: None
+; Used registers: ax
 ; Initialize PIC (8259)
 init_pic:
     ; Initialize Master PIC (IRQ 0-7)
@@ -20,6 +25,11 @@ init_pic:
     
     ret
 
+; --------------------------------
+; |   Kernel Interrupt Handling  |
+; --------------------------------
+; Input: None
+; Used registers: ax, es
 ; Set up IRQ handler vectors in IVT
 setup_irq_handlers:
     ; Save interrupt vector table segment
@@ -41,6 +51,11 @@ setup_irq_handlers:
     pop es
     ret
 
+; --------------------------------
+; |   Kernel Interrupt Handling  |
+; --------------------------------
+; Input: None
+; Used registers: ax
 ; IRQ 0 Handler - Timer interrupt
 irq0_handler:
     pusha
@@ -55,6 +70,11 @@ irq0_handler:
     popa
     iret
 
+; --------------------------------
+; |   Kernel Interrupt Handling  |
+; --------------------------------
+; Input: None
+; Used registers: ax
 ; IRQ 1 Handler - Keyboard interrupt
 irq1_handler:
     pusha
@@ -70,27 +90,3 @@ irq1_handler:
     
     popa
     iret
-
-print_string:
-    push ax
-    push bx
-    push si
-    
-.next_char:
-    mov al, [si]            ; Load character from [DS:SI]
-    cmp al, 0               ; Check for null terminator
-    je .done
-    
-    mov ah, 0x0E            ; BIOS teletype output
-    mov bh, 0x00           ; page number
-    mov bl, 0x07           ; color
-    int 0x10
-    
-    inc si
-    jmp .next_char
-    
-.done:
-    pop si
-    pop bx
-    pop ax
-    ret

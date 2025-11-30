@@ -31,8 +31,8 @@ section .data
     ball_y dw 0          ; Ball center y coord
 
     ; ---- ball movement ----
-    ball_dx dw 1        ; horizontal speed (+right, -left)
-    ball_dy dw 1        ; vertical speed (+down, -up)
+    ball_dx dw 10        ; horizontal speed (+right, -left)
+    ball_dy dw 10        ; vertical speed (+down, -up)
 
     ; Ball update rate control
     ball_frame_counter db 0
