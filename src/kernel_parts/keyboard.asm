@@ -105,16 +105,16 @@ read_keyboard:
     cmp al, 0x9F  ; 'S' key break code
     je .s_released
 
-    cmp al, 0x12  ; Up Arrow make code
+    cmp al, 0x48  ; Up Arrow make code
     je .uparrow_pressed
 
-    cmp al, 0x92  ; Up Arrow break code
+    cmp al, 0xC8  ; Up Arrow break code
     je .uparrow_released
 
-    cmp al, 0x20  ; Down Arrow make code
+    cmp al, 0x50  ; Down Arrow make code
     je .downarrow_pressed
 
-    cmp al, 0xA0  ; Down Arrow break code
+    cmp al, 0xD0  ; Down Arrow break code
     je .downarrow_released
 
     jmp .done
