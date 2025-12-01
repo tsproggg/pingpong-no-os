@@ -33,8 +33,8 @@ game_loop:
         call draw_ball
 
 
-
-        mov si, [kernel_read_message]
+        call game_score_display
+        mov si, score_buffer
         call print_string_graphics
 
         .start_timer:

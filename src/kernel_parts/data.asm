@@ -58,7 +58,7 @@ section .data
 
     keys_table times 128 db 0
 
-    kernel_read_message db "Kernel Loaded Successfully!", 0
+    kernel_read_message db 1, 0
 
     timer_counter db 0
 
@@ -67,3 +67,6 @@ section .data
     score_player2 db 0
 
     game_over_flag db 0
+
+    score_buffer times 10 db 0
+    score_buffer_length equ 10
