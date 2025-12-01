@@ -74,13 +74,13 @@ define_ball_starting_coords:
     add ax, [field_frame_right]
     shr ax, 1   ; ax = field_frame_size_x / 2
 
-    add [ball_x], ax
+    mov [ball_x], ax
 
     mov ax, [field_frame_top]
     add ax, [field_frame_bottom]
     shr ax, 1   ; ax = field_frame_size_y / 2
 
-    add word [ball_y], ax
+    mov [ball_y], ax
 
     ret
 
