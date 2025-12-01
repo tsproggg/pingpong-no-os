@@ -75,14 +75,12 @@ define_ball_starting_coords:
     shr ax, 1   ; ax = field_frame_size_x / 2
 
     add [ball_x], ax
-    ; sub word [ball_x], ball_radius       ; ball_x
 
     mov ax, [field_frame_top]
     add ax, [field_frame_bottom]
     shr ax, 1   ; ax = field_frame_size_y / 2
 
     add word [ball_y], ax
-    ; sub word [ball_y], ball_radius       ; ball_y
 
     ret
 
