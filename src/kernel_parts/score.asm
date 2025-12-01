@@ -2,21 +2,23 @@
 ; |      Game Score Display     |
 ; ------------------------------
 game_score_display:
-    ; Clear the score buffer first
+    ; Clear the score buffer completely with spaces first
     mov di, score_buffer
     mov cx, score_buffer_length
     .clear_loop:
-        mov byte [di], 0
+        mov byte [di], ' '  ; Fill with spaces instead of zeros
         inc di
         loop .clear_loop
 
+    ; Reset di to start of buffer
+    mov di, score_buffer
+
     ; Convert player 1 score
     mov al, [score_player1]
-    mov di, score_buffer
     call convert
     ; di now points to the position after player 1's score
 
-    ; Add separator for a score
+    ; Add score separator
     mov byte [di], ':'
     inc di
     ; di now points to where player 2's score should start
@@ -26,6 +28,7 @@ game_score_display:
     call convert
     ; di now points to the position after player 2's score
 
+    ; Null terminate to end the string
     mov byte [di], 0
     ret
 

@@ -90,12 +90,14 @@ game_loop:
 
         call erase_ball
 
+        ; CLEAR THE OLD SCORE TEXT FIRST
+        call clear_score_area
+
         call game_score_display
         mov si, score_buffer
         call print_string_graphics
 
         jmp .init
-
 
 ; ------------------------------------
 ; |   SUBROUTINE: CHECK WIN          |
