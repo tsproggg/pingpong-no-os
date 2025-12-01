@@ -73,11 +73,10 @@ update_ball:
 
     ; ---- screen boundaries ----
     ; horizontal bounce
-    cmp ax, ball_radius
+    cmp ax, [field_frame_left]
     jl .bounce_left
 
-    mov si, 640 - ball_radius
-    cmp ax, si
+    cmp ax, [field_frame_right]
     jg .bounce_right
     jmp .check_vertical
 
@@ -101,10 +100,13 @@ update_ball:
         add ax, cx  ; double correction to bounce back
 
     .check_vertical:
-        cmp bx, ball_radius
+        mov si, [field_frame_top]
+        add si, ball_radius
+        cmp bx, si
         jl .bounce_top
-
-        mov si, 480 - ball_radius
+        
+        mov si, [field_frame_bottom]
+        sub si, ball_radius
         cmp bx, si
         jg .bounce_bottom
         jmp .store
