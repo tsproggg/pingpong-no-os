@@ -69,4 +69,4 @@ game_loop:
 
         call erase_ball
 
-        jmp .restart_point
+        jmp .init
