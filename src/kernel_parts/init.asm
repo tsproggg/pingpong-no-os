@@ -71,22 +71,16 @@ define_paddles_starting_coords:
 ; Used registers: ax
 define_ball_starting_coords:
     mov ax, [field_frame_left]
-    mov [ball_x], ax
-
-    mov ax, [field_frame_size_x]
+    add ax, [field_frame_right]
     shr ax, 1   ; ax = field_frame_size_x / 2
 
-    add [ball_x], ax
-    sub word [ball_x], ball_radius       ; ball_x
-
-    mov ax, [field_frame_top]
     mov [ball_x], ax
 
-    mov ax, [field_frame_size_y]
+    mov ax, [field_frame_top]
+    add ax, [field_frame_bottom]
     shr ax, 1   ; ax = field_frame_size_y / 2
 
-    add word [ball_y], ax
-    sub word [ball_y], ball_radius       ; ball_y
+    mov [ball_y], ax
 
     ret
 
@@ -117,3 +111,4 @@ init_random_ball_direction:
 
     .posy:
         ret
+        

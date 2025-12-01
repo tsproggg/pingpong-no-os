@@ -31,12 +31,9 @@ section .data
     ball_y dw 0          ; Ball center y coord
 
     ; ---- ball movement ----
-    ball_dx dw 1        ; horizontal speed (+right, -left)
-    ball_dy dw 1        ; vertical speed (+down, -up)
+    ball_dx dw 10        ; horizontal speed (+right, -left)
+    ball_dy dw 10        ; vertical speed (+down, -up)
 
-    ; Ball update rate control
-    ball_frame_counter db 0
-    ball_update_rate equ 90    ; Update ball for written frames
 
     ; paddles
     paddle_width equ 8
@@ -48,3 +45,25 @@ section .data
 
     paddle_2_x dw 0
     paddle_2_y dw 0     ; left top corner
+
+    ;pressed keys
+
+    key_w_pressed db 0
+    key_s_pressed db 0
+    key_uparrow_pressed db 0
+    key_downarrow_pressed db 0
+
+    keys_table times 128 db 0
+
+    kernel_read_message db 1, 0
+
+    timer_counter db 0
+
+    ;game
+    score_player1 db 0
+    score_player2 db 0
+
+    game_over_flag db 0
+
+    score_buffer times 10 db 0
+    score_buffer_length equ 10

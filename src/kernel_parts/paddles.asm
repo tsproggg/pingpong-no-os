@@ -257,3 +257,30 @@ update_position_down:
     call draw_filled_rectangle
 
     ret
+
+move_paddles:
+    ; Check paddle 1 up (W key)
+    cmp byte [key_w_pressed], 1
+    jne .check_s
+    call move_paddle_1_up
+
+.check_s:
+    ; Check paddle 1 down (S key)
+    cmp byte [key_s_pressed], 1
+    jne .check_up
+    call move_paddle_1_down
+
+.check_up:
+    ; Check paddle 2 up (Up arrow)
+    cmp byte [key_uparrow_pressed], 1
+    jne .check_down
+    call move_paddle_2_up
+
+.check_down:
+    ; Check paddle 2 down (Down arrow)
+    cmp byte [key_downarrow_pressed], 1
+    jne .done
+    call move_paddle_2_down
+
+.done:
+    ret

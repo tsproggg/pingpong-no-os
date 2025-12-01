@@ -18,6 +18,11 @@ clear_screen:
 ; Inputs: si - string pointer
 ; Used registers: ax, bx, dx, si
 print_string_graphics:
+    ; First, clear the score area to remove any old text
+    push si
+    call clear_score_area
+    pop si
+
     mov ah, 0x02    ; set cursor position
     mov bh, 0x00    ; page 0
     mov dh, 1       ; row (adjust as needed)
@@ -229,4 +234,21 @@ draw_field_frame:
     add si, field_frame_border_width    ; y1
     call draw_filled_rectangle
 
+    ret
+
+
+
+; -----------------------------------
+; |     SUBROUTINE: SCREEN          |
+; -----------------------------------
+; Clears the text area where score is displayed
+; Inputs: none
+; Used registers: ax, bx, cx, dx, si, di
+clear_score_area:
+    mov al, BLACK_COLOR
+    mov bx, 0           ; x0 - left edge
+    mov cx, 200         ; x1 - wide enough for score text
+    mov dx, 0           ; y0 - top
+    mov si, 40          ; y1
+    call draw_filled_rectangle
     ret

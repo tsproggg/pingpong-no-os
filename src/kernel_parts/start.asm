@@ -15,6 +15,14 @@ _start:
     mov ax, 0x9000      ; Load the desired stack segment value into AX
     mov ss, ax          ; Set the Stack Segment (SS)
     mov sp, 0xFFFF      ; Set the Stack Pointer (SP) to the top of the segment
+
+    ; Initialize PIC (Programmable Interrupt Controller)
+    call init_pic
+    
+    ; Set up IRQ handlers
+    call setup_irq_handlers
+
+    ; Enable interrupts
     sti
 
     ; section .data pointer initialization

@@ -54,39 +54,61 @@ read_key_status:
     int 0x16
     ret
 
-
 ; -------------------------------------
 ; |     SUBROUTINE: KEYBOARD         |
 ; -------------------------------------
 ; Inputs: none
-; Output: ax - scan code of the pressed key
+; Used registers: ax
 read_keyboard:
-    xor ax, ax
-    call read_character_non_blocking
-    cmp al, 119
+    cmp al, 0x11  ; 'W' key make code
     je .w_pressed
-    cmp al, 115
+
+    cmp al, 0x91  ; 'W' key break code
+    je .w_released
+
+    cmp al, 0x1F  ; 'S' key make code
     je .s_pressed
-    cmp al, 0 ; check for extended key
-    jne .done
-    cmp ah, 0x48
+
+    cmp al, 0x9F  ; 'S' key break code
+    je .s_released
+
+    cmp al, 0x48  ; Up Arrow make code
     je .uparrow_pressed
-    cmp ah, 0x50
+
+    cmp al, 0xC8  ; Up Arrow break code
+    je .uparrow_released
+
+    cmp al, 0x50  ; Down Arrow make code
     je .downarrow_pressed
+
+    cmp al, 0xD0  ; Down Arrow break code
+    je .downarrow_released
 
     jmp .done
 
     .w_pressed:
-        call move_paddle_1_up
+        mov byte [key_w_pressed], 1
+        jmp .done
+    .w_released:
+        mov byte [key_w_pressed], 0
         jmp .done
     .s_pressed:
-        call move_paddle_1_down
+        mov byte [key_s_pressed], 1
+        jmp .done
+    .s_released:
+        mov byte [key_s_pressed], 0
         jmp .done
     .uparrow_pressed:
-        call move_paddle_2_up
+        mov byte [key_uparrow_pressed], 1
+        jmp .done
+    .uparrow_released:
+        mov byte [key_uparrow_pressed], 0
         jmp .done
     .downarrow_pressed:
-        call move_paddle_2_down
+        mov byte [key_downarrow_pressed], 1
+        jmp .done
+    .downarrow_released:
+        mov byte [key_downarrow_pressed], 0
         jmp .done
 
     .done:
