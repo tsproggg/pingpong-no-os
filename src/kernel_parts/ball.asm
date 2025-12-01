@@ -74,10 +74,10 @@ update_ball:
     ; ---- screen boundaries ----
     ; horizontal bounce
     cmp ax, [field_frame_left]
-    jl .bounce_left
+    jl .game_over_left
 
     cmp ax, [field_frame_right]
-    jg .bounce_right
+    jg .game_over_right
 
     push dx
     call check_collision_paddle1
@@ -93,6 +93,18 @@ update_ball:
 
     jmp .check_vertical
 
+    .game_over_right:
+        ; Player 1 scores
+        inc byte [score_player1]
+        mov byte [game_over_flag], 1
+        jmp .store
+
+    .game_over_left:
+        ; Player 2 scores
+        inc byte [score_player2]
+        mov byte [game_over_flag], 1
+        jmp .store
+    
     .bounce_left:
         ; Reverse direction: cx = -cx using sub
         mov si, cx

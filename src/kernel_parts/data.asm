@@ -61,3 +61,9 @@ section .data
     kernel_read_message db "Kernel Loaded Successfully!", 0
 
     timer_counter db 0
+
+    ;game
+    score_player1 db 0
+    score_player2 db 0
+
+    game_over_flag db 0
