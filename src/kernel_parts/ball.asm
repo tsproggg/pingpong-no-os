@@ -78,6 +78,19 @@ update_ball:
 
     cmp ax, [field_frame_right]
     jg .bounce_right
+
+    push dx
+    call check_collision_paddle1
+    cmp dx, 1
+    pop dx
+    je .bounce_left
+
+    push dx
+    call check_collision_paddle2
+    cmp dx, 1
+    pop dx
+    je .bounce_right
+
     jmp .check_vertical
 
     .bounce_left:
@@ -139,4 +152,65 @@ update_ball:
 
         ; draw new frame
         call draw_ball
+        ret
+
+; ---------------------------------------
+; |     SUBROUTINE: BALL UPDATE         |
+; ---------------------------------------
+; Check collision with paddle 1
+; Inputs:
+;    ax - ball_x
+;    bx - ball_y
+; Outputs: dx - collision flag (0 = no collision, 1 = collision)
+; Used registers: si, dx
+check_collision_paddle1:
+    xor dx, dx
+    mov si, [paddle_1_x]
+    add si, paddle_width
+    add si, ball_radius
+    cmp ax, si
+    jg .no_paddle1_collision
+
+    mov si, [paddle_1_y]
+    sub si, ball_radius
+    cmp bx, si
+    jl .no_paddle1_collision
+
+    mov si, [paddle_1_y]
+    add si, paddle_height
+    add si, ball_radius
+    cmp bx, si
+    jg .no_paddle1_collision
+    mov dx, 1
+
+    .no_paddle1_collision:
+        ret
+
+; ---------------------------------------
+; |     SUBROUTINE: BALL UPDATE         |
+; ---------------------------------------
+; Check collision with paddle 2
+; Inputs:
+;    ax - ball_x
+;    bx - ball_y
+; Used registers: si
+; Outputs: dx - collision flag (0 = no collision, 1 = collision)
+check_collision_paddle2:
+    xor dx, dx
+    mov si, [paddle_2_x]
+    sub si, ball_radius
+    cmp ax, si
+    jl .no_paddle2_collision
+    mov si, [paddle_2_y]
+    sub si, ball_radius
+    cmp bx, si
+    jl .no_paddle2_collision
+    mov si, [paddle_2_y]
+    add si, paddle_height
+    add si, ball_radius
+    cmp bx, si
+    jg .no_paddle2_collision
+    mov dx, 1
+
+    .no_paddle2_collision:
         ret
