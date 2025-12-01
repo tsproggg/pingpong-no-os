@@ -34,9 +34,6 @@ section .data
     ball_dx dw 10        ; horizontal speed (+right, -left)
     ball_dy dw 10        ; vertical speed (+down, -up)
 
-    ; Ball update rate control
-    ball_frame_counter db 0
-    ball_update_rate equ 90    ; Update ball for written frames
 
     ; paddles
     paddle_width equ 8

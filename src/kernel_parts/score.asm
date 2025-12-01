@@ -2,15 +2,30 @@
 ; |      Game Score Display     |
 ; ------------------------------
 game_score_display:
+    ; Clear the score buffer first
+    mov di, score_buffer
+    mov cx, score_buffer_length
+    .clear_loop:
+        mov byte [di], 0
+        inc di
+        loop .clear_loop
 
-    ; call empty_score_buffer
-    mov byte al, [score_player1]
+    ; Convert player 1 score
+    mov al, [score_player1]
     mov di, score_buffer
     call convert
-    mov byte [di], ':'       ; space separator
+    ; di now points to the position after player 1's score
+
+    ; Add separator for a score
+    mov byte [di], ':'
     inc di
-    mov byte al, [score_player2]
+    ; di now points to where player 2's score should start
+
+    ; Convert player 2 score
+    mov al, [score_player2]
     call convert
+    ; di now points to the position after player 2's score
+
     mov byte [di], 0
     ret
 
@@ -24,6 +39,7 @@ convert:
     mov byte [di], '0'
     inc di
     jmp .done
+
 .convert_loop:
     xor dx, dx
     mov bx, 10
@@ -42,5 +58,5 @@ convert:
     inc di
     loop .write_back
 
-    .done:
+.done:
     ret
