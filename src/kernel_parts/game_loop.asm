@@ -30,10 +30,17 @@ game_loop:
         mov si, [kernel_read_message]
         call print_string_graphics
 
+        .start_timer:
+        hlt
+        cmp byte [timer_counter], 120  ; wait for 2 seconds 
+        jb .start_timer
+        mov byte [timer_counter], 0
+        
     .loop:
         hlt
         cmp byte [timer_counter], 1  ; one tick = 1/60 second
         jb .loop
+        mov byte [timer_counter], 0
 
         call move_paddles
         call update_ball
