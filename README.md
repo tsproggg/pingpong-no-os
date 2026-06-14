@@ -1,5 +1,33 @@
 # PING-PONG NO OS
 
+## Team Members
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Menuas">
+        <img src="https://avatars.githubusercontent.com/Menuas?v=4" width="75px;" alt=""/>
+      </a>
+      <br />
+      <sub><b><a href="https://github.com/Menuas" style="text-decoration: none !important; color: inherit;">Menua Simonian</a></b></sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/tsproggg">
+        <img src="https://avatars.githubusercontent.com/tsproggg?v=4" width="75px;" alt=""/>
+      </a>
+      <br />
+      <sub><b><a href="https://github.com/tsproggg" style="text-decoration: none !important; color: inherit;">Valerii Sofian</a></b></sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/0x3vAD">
+        <img src="https://avatars.githubusercontent.com/0x3vAD?v=4" width="75px;" alt=""/>
+      </a>
+      <br />
+      <sub><b><a href="https://github.com/0x3vAD" style="text-decoration: none !important; color: inherit;">Davit Ter-Torosyan</a></b></sub>
+    </td>
+  </tr>
+</table>
+
+
 ## About Project
 
 This project was developed as part of the Computer Organisation course at the American University of Armenia under the supervision of Professor [Norayr Chilingaryan](https://github.com/norayr), whose guidance and teaching were invaluable throughout the project.
@@ -23,7 +51,7 @@ docker build -t ping-pong-no-os .
 docker run -p 5900:5900 ping-pong-no-os
 ```
 
-After running the the both cases, you can connect to the game using a VNC client. The default VNC port is 5900. You can use any VNC client of your choice to connect to the game, but we only tested it with [TigerVNC](https://tigervnc.org/).
+After running the the both cases, you can connect to the game using a VNC client. The default VNC port is 5900. You can use any VNC client of your choice to connect to the game, but we only tested it with [TigerVNC](https://tigervnc.org/) and [RealVNC Viewer](https://www.realvnc.com/en).
 
 ## Small Demo
 
